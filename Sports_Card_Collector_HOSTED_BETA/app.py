@@ -515,9 +515,11 @@ with scan_tab:
         with c2:
             back = st.file_uploader("Choose back photo", type=["jpg","jpeg","png","webp"], key=f"back_up_{nonce}")
 
-    if st.button("🔎 Identify Card", type="primary", disabled=front is None, use_container_width=True):
-        try:
-            with st.spinner("Identifying and cross-checking the card number..."):
+        if st.button("🔎 Identify Card", type="primary", disabled=front is None, use_container_width=True):
+            st.success("Identify button clicked")
+            try:
+    
+                with st.spinner("Identifying and cross-checking the card number..."):
                 identity = analyze_card(front, back)
                 identity["year"] = clean_year(identity.get("year"))
                 visual = verify_card_number(front, back, identity)
