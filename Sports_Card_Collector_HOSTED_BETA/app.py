@@ -310,6 +310,7 @@ def analyze_card(front, back=None):
 "CARD NUMBER means the catalog/checklist number assigned to this exact card, often printed near an edge, corner, copyright line, or card-number label. "
 "Do not confuse the card number with a jersey number, statistic, year, set size, copyright year, print code, or other incidental number. "
 "Never infer a card number from the set size. Visually read the actual printed number from the card. "
+            "If the card shows a checklist position such as '13 of 660', interpret it as card_number='13', NOT serial_number='13 of 660'. A checklist position is not a limited serial number. "
 "If the printed card number cannot be read confidently, return card_number as an empty string. Condition is only a cautious visual description."
         ),
     }]
@@ -331,6 +332,7 @@ def verify_card_number(front, back, identification):
 "Visually locate and read the actual printed card number; do not infer or calculate it. "
 "Ignore stats, years, set size, jersey numbers, copyright years, print codes, season totals and all incidental numbers. "
 "The set size is NOT the card number. For example, a marking such as '13 of 660' means card_number='13', not '660'. "
+            "A phrase like '13 of 660' is a checklist position: card_number='13'. It is NOT a serial number, so serial_number must remain empty unless the card is explicitly marked as a limited serial-numbered card. "
 f"First-pass identity: player={identification.get('player','')}, year={identification.get('year','')}, "
 f"manufacturer={identification.get('manufacturer','')}, set={identification.get('set','')}, "
 f"candidate={identification.get('card_number','')}. "
