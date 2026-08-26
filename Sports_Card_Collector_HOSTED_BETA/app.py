@@ -528,16 +528,21 @@ with scan_tab:
                 agree = normalize_card_number(vnum) and normalize_card_number(vnum) == normalize_card_number(cnum)
                 strong_checklist = checklist.get("exact_identity_confirmed") and float(checklist.get("confidence") or 0) >= .92
 
-                if agree and float(visual.get("confidence") or 0) >= .80 and float(checklist.get("confidence") or 0) >= .80:
-                    identity["card_number"] = cnum
-                    identity["_card_number_status"] = "image + checklist"
-                elif strong_checklist and (not vnum or visual.get("ambiguous") or float(visual.get("confidence") or 0) < .70):
-                    identity["card_number"] = cnum
-                    identity["_card_number_status"] = "checklist"
+                visual_confidence = float(visual.get("confidence") or 0)
+
+                if vnum and not visual.get("ambiguous") and visual_confidence >= .80:
+                identity["card_number"] = vnum
+                identity["_card_number_status"] = "image"
+                elif agree and visual_confidence >= .80 and float(checklist.get("confidence") or 0) >= .80:
+                identity["card_number"] = cnum
+                identity["_card_number_status"] = "image + checklist"
+                elif strong_checklist and (not vnum or visual.get("ambiguous") or visual_confidence < .70):
+                identity["card_number"] = cnum
+                identity["_card_number_status"] = "checklist"
                 else:
-                    identity["card_number"] = ""
-                    identity["_card_number_status"] = "unresolved"
-                    identity["confidence"] = min(float(identity.get("confidence") or 0), .79)
+                identity["card_number"] = ""
+                identity["_card_number_status"] = "unresolved"
+                identity["confidence"] = min(float(identity.get("confidence") or 0), .79)
 
                 identity["_visual_number"] = vnum
                 identity["_checklist_number"] = cnum
