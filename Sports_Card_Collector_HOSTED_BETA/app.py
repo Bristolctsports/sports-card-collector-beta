@@ -306,9 +306,11 @@ def analyze_card(front, back=None):
         "type": "input_text",
         "text": (
             "Identify this sports trading card accurately. Use both front and back when provided. "
-            "Do not invent unreadable details. CARD NUMBER means the catalog/checklist number for this exact card. "
-            "Never use stats, jersey numbers, years, set size, copyright numbers, print codes, or incidental numbers. "
-            "If uncertain, return card_number as an empty string. Condition is only a cautious visual description."
+"Read the BACK carefully for the printed catalog/checklist card number. "
+"CARD NUMBER means the catalog/checklist number assigned to this exact card, often printed near an edge, corner, copyright line, or card-number label. "
+"Do not confuse the card number with a jersey number, statistic, year, set size, copyright year, print code, or other incidental number. "
+"Never infer a card number from the set size. Visually read the actual printed number from the card. "
+"If the printed card number cannot be read confidently, return card_number as an empty string. Condition is only a cautious visual description."
         ),
     }]
     content.append({"type": "input_image", "image_url": image_to_data_url(front), "detail": "high"})
@@ -325,11 +327,15 @@ def verify_card_number(front, back, identification):
     content = [{
         "type": "input_text",
         "text": (
-            "Verify ONLY the exact catalog/checklist card number. Use the BACK as primary visual evidence. "
-            "Ignore stats, years, set size, jersey numbers, print codes, season totals and all incidental numbers. "
-            f"First-pass identity: player={identification.get('player','')}, year={identification.get('year','')}, "
-            f"manufacturer={identification.get('manufacturer','')}, set={identification.get('set','')}, "
-            f"candidate={identification.get('card_number','')}. If uncertain, return blank and ambiguous=true."
+            "Verify ONLY the exact catalog/checklist card number. Examine the BACK image very carefully. "
+"Visually locate and read the actual printed card number; do not infer or calculate it. "
+"Ignore stats, years, set size, jersey numbers, copyright years, print codes, season totals and all incidental numbers. "
+"The set size is NOT the card number. For example, a marking such as '13 of 660' means card_number='13', not '660'. "
+f"First-pass identity: player={identification.get('player','')}, year={identification.get('year','')}, "
+f"manufacturer={identification.get('manufacturer','')}, set={identification.get('set','')}, "
+f"candidate={identification.get('card_number','')}. "
+"If the printed card number is clearly readable, return that number even when it disagrees with the first-pass candidate. "
+"If it cannot be read confidently, return blank and ambiguous=true."
         ),
     }]
     content.append({"type": "input_image", "image_url": image_to_data_url(front), "detail": "high"})
