@@ -521,8 +521,7 @@ with scan_tab:
                 identity = analyze_card(front, back)
                 identity["year"] = clean_year(identity.get("year"))
                 visual = verify_card_number(front, back, identity)
-                checklist = checklist_crosscheck(identity, visual)
-
+                checklist = {"confirmed_card_number": "", "exact_identity_confirmed": False, "confidence": 0, "reason": "Visual-only test", "sources": []}
                 vnum = str(visual.get("confirmed_card_number") or "").strip()
                 cnum = str(checklist.get("confirmed_card_number") or "").strip()
                 agree = normalize_card_number(vnum) and normalize_card_number(vnum) == normalize_card_number(cnum)
