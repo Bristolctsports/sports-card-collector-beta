@@ -359,7 +359,7 @@ def checklist_crosscheck(identity, visual):
         "Prefer manufacturer checklists, TCDB-like checklist references, PSA/Beckett/catalog references, COMC catalog pages, "
         "or similarly reputable sources. Ignore stats, set size, print codes, jersey numbers, checklist-position text, and serial numbering. "
 "Confirm the catalog card number only when player, year, manufacturer, and set match reliable checklist sources exactly. "
-"If reliable checklist sources agree on a card number that conflicts with the visual candidate, prefer the checklist number and explain the conflict in reason. "."
+"If reliable checklist sources agree on a card number that conflicts with the visual candidate, prefer the checklist number and explain the conflict in reason. "
     )
     r = openai_client().responses.create(
         model=OPENAI_MODEL,
