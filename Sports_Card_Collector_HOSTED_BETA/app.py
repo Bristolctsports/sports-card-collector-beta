@@ -520,14 +520,14 @@ with scan_tab:
             try:
     
                 with st.spinner("Identifying and cross-checking the card number..."):
-                identity = analyze_card(front, back)
-                identity["year"] = clean_year(identity.get("year"))
-                visual = verify_card_number(front, back, identity)
-                checklist = {"confirmed_card_number": "", "exact_identity_confirmed": False, "confidence": 0, "reason": "Visual-only test", "sources": []}
-                vnum = str(visual.get("confirmed_card_number") or "").strip()
-                cnum = str(checklist.get("confirmed_card_number") or "").strip()
-                agree = normalize_card_number(vnum) and normalize_card_number(vnum) == normalize_card_number(cnum)
-                strong_checklist = checklist.get("exact_identity_confirmed") and float(checklist.get("confidence") or 0) >= .92
+                    identity = analyze_card(front, back)
+                    identity["year"] = clean_year(identity.get("year"))
+                    visual = verify_card_number(front, back, identity)
+                    checklist = {"confirmed_card_number": "", "exact_identity_confirmed": False, "confidence": 0, "reason": "Visual-only test", "sources": []}
+                    vnum = str(visual.get("confirmed_card_number") or "").strip()
+                    cnum = str(checklist.get("confirmed_card_number") or "").strip()
+                    agree = normalize_card_number(vnum) and normalize_card_number(vnum) == normalize_card_number(cnum)
+                    strong_checklist = checklist.get("exact_identity_confirmed") and float(checklist.get("confidence") or 0) >= .92
 
                 visual_confidence = float(visual.get("confidence") or 0)
 
