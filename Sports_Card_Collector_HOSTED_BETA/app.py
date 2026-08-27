@@ -309,6 +309,8 @@ def analyze_card(front, back=None):
             "Do not invent unreadable details. CARD NUMBER means the catalog/checklist number for this exact card. "
             "Never use stats, jersey numbers, years, set size, copyright numbers, print codes, or incidental numbers. "
             "If the card's set/product can be identified with a year (for example '1989 Score'), return that year in the year field even if the year is not clearly printed on the card. "
+            "Identify the exact manufacturer, year, and set/product from visible card design, logos, borders, branding and back layout before inferring a card number. "
+            "Do not guess a set from the player's name, career year, statistics, or memory; if the exact set cannot be supported by the images, return set as 'Unknown'. "
             "If uncertain, return card_number as an empty string. Condition is only a cautious visual description."
         ),
     }]
