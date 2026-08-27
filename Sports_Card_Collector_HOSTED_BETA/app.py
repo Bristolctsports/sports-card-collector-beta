@@ -526,20 +526,17 @@ with scan_tab:
                 visual_conf = float(visual.get("confidence") or 0)
                 visual_good = bool(vnum) and not visual.get("ambiguous") and visual_conf >= .85 
                 cnum = ""
-                if visual_good:
-                # Strong image result: skip the slow web checklist.
                 checklist = {
-                "exact_identity_confirmed": False,
-                "confirmed_card_number": "",
-                "confidence": 0,
-                "reason": "Web checklist skipped — card number confidently verified from image.",
-                "sources": [],
-                }
-               identity["card_number"] = vnum
-               identity["_card_number_status"] = "image"
-               else:
-               # Only use the slower web search when the image result needs help.
-               checklist = checklist_crosscheck(identity, visual)
+               "exact_identity_confirmed": True,
+               "confirmed_card_number": vnum,
+               "confidence": visual_conf,
+               "reason": "Web checklist skipped — card number confidently verified from image.",
+               "sources": [],
+}
+
+if not visual_good:
+    checklist = checklist_crosscheck(identity, visual)
+                
           
 
         cnum = str(checklist.get("confirmed_card_number") or "").strip()
