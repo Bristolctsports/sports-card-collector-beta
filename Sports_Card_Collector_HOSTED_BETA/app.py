@@ -327,6 +327,7 @@ def verify_card_number(front, back, identification):
         "text": (
             "Verify ONLY the exact catalog/checklist card number. Use the BACK as primary visual evidence. "
             "Ignore stats, years, set size, jersey numbers, print codes, season totals and all incidental numbers. "
+            "A marking like '575 of 660' or '575/660' is a serial-number/print-run marker, NEVER the catalog/checklist card number. If that is the only number visible, return confirmed_card_number as blank and ambiguous=true. "
             f"First-pass identity: player={identification.get('player','')}, year={identification.get('year','')}, "
             f"manufacturer={identification.get('manufacturer','')}, set={identification.get('set','')}, "
             f"candidate={identification.get('card_number','')}. If uncertain, return blank and ambiguous=true."
