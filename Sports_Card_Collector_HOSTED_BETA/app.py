@@ -662,9 +662,10 @@ with scan_tab:
                     candidate["front_photo_path"] = front_path
                     candidate["back_photo_path"] = back_path
                     insert_card(token, candidate)
-                   st.session_state["just_added"] = f"Added {player} to your collection."
-                   reset_scan()
-                   st.rerun()
+                    st.session_state["just_added"] = f"Added {player} to your collection."
+                    reset_scan()
+                    st.rerun()
+                   
             except Exception as exc:
                 st.error(f"Could not save card: {exc}")
 
