@@ -521,33 +521,52 @@ with scan_tab:
                 identity = analyze_card(front, back)
                 identity["year"] = clean_year(identity.get("year"))
                 visual = verify_card_number(front, back, identity)
-                checklist = checklist_crosscheck(identity, visual)
 
                 vnum = str(visual.get("confirmed_card_number") or "").strip()
-                cnum = str(checklist.get("confirmed_card_number") or "").strip()
-                agree = normalize_card_number(vnum) and normalize_card_number(vnum) == normalize_card_number(cnum)
-                strong_checklist = checklist.get("exact_identity_confirmed") and float(checklist.get("confidence") or 0) >= .92
+                visual_conf = float(visual.get("confidence") or 0)
+                visual_good = bool(vnum) and not visual.get("ambiguous") and visual_conf >= .85 
+                cnum = ""
 
-                if agree and float(visual.get("confidence") or 0) >= .80 and float(checklist.get("confidence") or 0) >= .80:
-                    identity["card_number"] = cnum
-                    identity["_card_number_status"] = "image + checklist"
-                elif strong_checklist and (not vnum or visual.get("ambiguous") or float(visual.get("confidence") or 0) < .70):
-                    identity["card_number"] = cnum
-                    identity["_card_number_status"] = "checklist"
-                else:
-                    identity["card_number"] = ""
-                    identity["_card_number_status"] = "unresolved"
-                    identity["confidence"] = min(float(identity.get("confidence") or 0), .79)
+          if visual_good:
+                # Strong image result: skip the slow web checklist.
+                checklist = {
+                "exact_identity_confirmed": False,
+                "confirmed_card_number": "",
+                "confidence": 0,
+                "reason": "Web checklist skipped — card number confidently verified from image.",
+                "sources": [],
+                }
+          identity["card_number"] = vnum
+          identity["_card_number_status"] = "image"
+else:
+    # Only use the slower web search when the image result needs help.
+    checklist = checklist_crosscheck(identity, visual)
 
-                identity["_visual_number"] = vnum
-                identity["_checklist_number"] = cnum
-                identity["_checklist_reason"] = checklist.get("reason", "")
-                identity["_checklist_sources"] = checklist.get("sources", [])
-                st.session_state["scan_result"] = identity
-                st.session_state["scan_front"] = front
-                st.session_state["scan_back"] = back
-                st.session_state.pop("valuation", None)
-                st.session_state.pop("duplicate", None)
+    cnum = str(checklist.get("confirmed_card_number") or "").strip()
+    agree = normalize_card_number(vnum) and normalize_card_number(vnum) == normalize_card_number(cnum)
+    strong_checklist = checklist.get("exact_identity_confirmed") and float(checklist.get("confidence") or 0) >= .92
+
+    if agree and float(visual.get("confidence") or 0) >= .80 and float(checklist.get("confidence") or 0) >= .80:
+        identity["card_number"] = cnum
+        identity["_card_number_status"] = "image + checklist"
+    elif strong_checklist and (not vnum or visual.get("ambiguous") or float(visual.get("confidence") or 0) < .70):
+        identity["card_number"] = cnum
+        identity["_card_number_status"] = "checklist"
+    else:
+        identity["card_number"] = ""
+        identity["_card_number_status"] = "unresolved"
+        identity["confidence"] = min(float(identity.get("confidence") or 0), .79)
+     identity["_visual_number"] = vnum
+
+
+        identity["_checklist_number"] = cnum
+        identity["_checklist_reason"] = checklist.get("reason", "")
+        identity["_checklist_sources"] = checklist.get("sources", [])
+        st.session_state["scan_result"] = identity
+        st.session_state["scan_front"] = front
+        st.session_state["scan_back"] = back
+        st.session_state.pop("valuation", None)
+        st.session_state.pop("duplicate", None)
         except Exception as exc:
             st.error(f"Identification failed: {exc}")
 
