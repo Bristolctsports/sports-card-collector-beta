@@ -527,7 +527,7 @@ with scan_tab:
                 visual_good = bool(vnum) and not visual.get("ambiguous") and visual_conf >= .85 
                 cnum = ""
 
-          if visual_good:
+                if visual_good:
                 # Strong image result: skip the slow web checklist.
                 checklist = {
                 "exact_identity_confirmed": False,
@@ -556,7 +556,7 @@ else:
         identity["card_number"] = ""
         identity["_card_number_status"] = "unresolved"
         identity["confidence"] = min(float(identity.get("confidence") or 0), .79)
-     identity["_visual_number"] = vnum
+        identity["_visual_number"] = vnum
 
 
         identity["_checklist_number"] = cnum
@@ -570,7 +570,7 @@ else:
         except Exception as exc:
             st.error(f"Identification failed: {exc}")
 
-    card = st.session_state.get("scan_result")
+       card = st.session_state.get("scan_result")
     if card:
         confidence = round(float(card.get("confidence") or 0) * 100)
         st.info(f"AI identification confidence: {confidence}%")
