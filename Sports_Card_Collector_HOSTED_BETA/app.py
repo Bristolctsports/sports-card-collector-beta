@@ -362,7 +362,7 @@ def checklist_crosscheck(identity, visual):
         "If the set is generic, missing, conflicting, or the candidate card number is unusual, return exact_identity_confirmed=false instead of guessing."
     )
     r = openai_client().responses.create(
-        model=OPENAI_MODEL,
+        model=OPENAI_FAST_MODEL,
         tools=[{"type": "web_search"}],
         input=prompt,
         text={"format": {"type": "json_schema", "name": "checklist_crosscheck", "strict": True, "schema": CARD_CHECKLIST_SCHEMA}},
