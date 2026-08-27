@@ -26,6 +26,7 @@ def secret(name, default=""):
 
 OPENAI_API_KEY = secret("OPENAI_API_KEY")
 OPENAI_MODEL = secret("OPENAI_MODEL", "gpt-5.6-terra")
+OPENAI_FAST_MODEL = secret("OPENAI_FAST_MODEL", "gpt-4.1-mini")
 SUPABASE_URL = secret("SUPABASE_URL").rstrip("/")
 SUPABASE_ANON_KEY = secret("SUPABASE_ANON_KEY")
 PHOTO_BUCKET = secret("PHOTO_BUCKET", "card-photos")
