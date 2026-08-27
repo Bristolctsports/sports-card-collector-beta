@@ -308,6 +308,7 @@ def analyze_card(front, back=None):
             "Identify this sports trading card accurately. Use both front and back when provided. "
             "Do not invent unreadable details. CARD NUMBER means the catalog/checklist number for this exact card. "
             "Never use stats, jersey numbers, years, set size, copyright numbers, print codes, or incidental numbers. "
+            "If the card's set/product can be identified with a year (for example '1989 Score'), return that year in the year field even if the year is not clearly printed on the card. "
             "If uncertain, return card_number as an empty string. Condition is only a cautious visual description."
         ),
     }]
