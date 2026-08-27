@@ -352,7 +352,8 @@ def checklist_crosscheck(identity, visual):
         f"Visual candidate={visual.get('confirmed_card_number','') if not visual.get('ambiguous') else ''}. "
         "Prefer manufacturer checklists, TCDB-like checklist references, PSA/Beckett/catalog references, COMC catalog pages, "
         "or similarly reputable sources. Ignore stats, set size, print codes, jersey numbers and serial numbering. "
-        "Only confirm when player, year, set and card number all align."
+        "Only confirm when player, year, manufacturer, exact set/product, and card number all align with reliable checklist evidence. "
+        "If the set is generic, missing, conflicting, or the candidate card number is unusual, return exact_identity_confirmed=false instead of guessing."
     )
     r = openai_client().responses.create(
         model=OPENAI_MODEL,
