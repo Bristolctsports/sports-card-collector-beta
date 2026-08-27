@@ -347,7 +347,7 @@ def checklist_crosscheck(identity, visual):
         "Cross-check the exact catalog/checklist number for a sports trading card using reliable web references. "
         f"Player={identity.get('player','')}; Year={identity.get('year','')}; "
         f"Manufacturer={identity.get('manufacturer','')}; Set={identity.get('set','')}; "
-        f"visual candidate={visual.get('confirmed_card_number','')}. "
+        f"Visual candidate={visual.get('confirmed_card_number','') if not visual.get('ambiguous') else ''}. "
         "Prefer manufacturer checklists, TCDB-like checklist references, PSA/Beckett/catalog references, COMC catalog pages, "
         "or similarly reputable sources. Ignore stats, set size, print codes, jersey numbers and serial numbering. "
         "Only confirm when player, year, set and card number all align."
