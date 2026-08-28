@@ -590,38 +590,44 @@ with scan_tab:
             
     
            
-       card = st.session_state.get("scan_result")
-    if card:
-        confidence = round(float(card.get("confidence") or 0) * 100)
-        st.info(f"AI identification confidence: {confidence}%")
+        card = st.session_state.get("scan_result")
+        if card:
+            confidence = round(float(card.get("confidence") or 0) * 100)
+            st.info(f"AI identification confidence: {confidence}%")
 
-        if card.get("card_number"):
-            st.success(f"✅ Card # verified by {card.get('_card_number_status')}: {card.get('card_number')}")
-        else:
-            st.warning(
-                f"⚠️ Card number was not auto-confirmed. Image candidate: {card.get('_visual_number') or 'none'}; "
-                f"checklist candidate: {card.get('_checklist_number') or 'none'}."
-            )
+            if card.get("card_number"):
+                st.success(
+                    f"✅ Card # verified by {card.get('_card_number_status')}: "
+                    f"{card.get('card_number')}"
+                )
+            else:
+                st.warning(
+                    f"⚠️ Card number was not auto-confirmed. "
+                    f"Image candidate: {card.get('_visual_number') or 'none'}; "
+                    f"checklist candidate: {card.get('_checklist_number') or 'none'}."
+                )
 
-        with st.expander("Card-number verification details"):
-            st.write(card.get("_checklist_reason") or "No additional detail.")
-            for s in card.get("_checklist_sources") or []:
-                if s.get("url"):
-                    st.markdown(f"- [{s.get('title') or 'Reference'}]({s['url']})")
+            with st.expander("Card-number verification details"):
+                st.write(card.get("_checklist_reason") or "No additional detail.")
+                for s in card.get("_checklist_sources") or []:
+                    if s.get("url"):
+                        st.markdown(
+                            f"- [{s.get('title') or 'Reference'}]({s['url']})"
+                        )
 
-        st.subheader("Confirm before adding")
-        a,b,c = st.columns(3)
-        with a:
-            sport = st.text_input("Sport", value=card.get("sport",""))
-            player = st.text_input("Player", value=card.get("player",""))
-            year = st.text_input("Year", value=card.get("year",""))
-            manufacturer = st.text_input("Manufacturer", value=card.get("manufacturer",""))
-        with b:
+            st.subheader("Confirm before adding")
+            a,b,c = st.columns(3)
+            with a:
+                sport = st.text_input("Sport", value=card.get("sport",""))
+                player = st.text_input("Player", value=card.get("player",""))
+                year = st.text_input("Year", value=card.get("year",""))
+                manufacturer = st.text_input("Manufacturer", value=card.get("manufacturer",""))
+           with b:
             set_name = st.text_input("Set", value=card.get("set",""))
             card_number = st.text_input("Card #", value=card.get("card_number",""))
             rookie = st.selectbox("Rookie?", ["Yes","No","Unknown"], index=["Yes","No","Unknown"].index(card.get("rookie","Unknown")))
             parallel = st.text_input("Parallel / Variation", value=card.get("parallel_variation",""))
-        with c:
+           with c:
             serial = st.text_input("Serial #", value=card.get("serial_number",""))
             autograph = st.selectbox("Autograph?", ["Yes","No","Unknown"], index=["Yes","No","Unknown"].index(card.get("autograph","Unknown")))
             relic = st.selectbox("Relic?", ["Yes","No","Unknown"], index=["Yes","No","Unknown"].index(card.get("relic","Unknown")))
