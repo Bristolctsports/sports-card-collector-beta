@@ -587,9 +587,7 @@ with scan_tab:
                     st.session_state["scan_back"] = back
                     st.session_state.pop("valuation", None)
                     st.session_state.pop("duplicate", None)
-                except Exception as exc:
-                  st.error(f"Identification failed: {exc}")
-            
+                
             
            
         card = st.session_state.get("scan_result")
