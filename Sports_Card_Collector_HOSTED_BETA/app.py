@@ -534,9 +534,10 @@ with scan_tab:
                "sources": [],
 }
 
-               if not visual_good:
-                      checklist = checklist_crosscheck(identity, visual)
-                
+                if not visual_good:
+                    checklist = checklist_crosscheck(identity, visual)
+
+            
           
 
                 cnum = str(checklist.get("confirmed_card_number") or "").strip()
