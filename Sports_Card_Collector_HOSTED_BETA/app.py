@@ -516,7 +516,7 @@ with scan_tab:
             back = st.file_uploader("Choose back photo", type=["jpg","jpeg","png","webp"], key=f"back_up_{nonce}")
 
     if st.button("🔎 Identify Card", type="primary", disabled=front is None, use_container_width=True):
-        try:
+       
              
                 with st.spinner("Identifying and cross-checking the card number..."):
                     identity = analyze_card(front, back)
@@ -563,7 +563,7 @@ with scan_tab:
                             and (
                                 not vnum
                                 or visual.get("ambiguous")
-                                or float(visual.get("confidence") or 0) < .70
+                                or float(visual.get("confidence") or 0) < .70    
                             )
                         ):
                             identity["card_number"] = cnum
@@ -587,60 +587,9 @@ with scan_tab:
                     st.session_state["scan_back"] = back
                     st.session_state.pop("valuation", None)
                     st.session_state.pop("duplicate", None)
-                
-    except Exception as exc:
-        st.error(f"Identification failed: {exc}")
-            with st.spinner("Identifying and cross-checking the card number..."):
-                identity = analyze_card(front, back)
-                identity["year"] = clean_year(identity.get("year"))
-                visual = verify_card_number(front, back, identity)
-
-                vnum = str(visual.get("confirmed_card_number") or "").strip()
-                visual_conf = float(visual.get("confidence") or 0)
-                visual_good = bool(vnum) and not visual.get("ambiguous") and visual_conf >= .85 
-                cnum = ""
-                checklist = {
-               "exact_identity_confirmed": True,
-               "confirmed_card_number": vnum,
-               "confidence": visual_conf,
-               "reason": "Web checklist skipped — card number confidently verified from image.",
-               "sources": [],
-}
-
-                if not visual_good:
-                    checklist = checklist_crosscheck(identity, visual)
-
             
-          
-
-                cnum = str(checklist.get("confirmed_card_number") or "").strip()
-                agree = normalize_card_number(vnum) and normalize_card_number(vnum) == normalize_card_number(cnum)
-                strong_checklist = checklist.get("exact_identity_confirmed") and float(checklist.get("confidence") or 0) >= .92
-            
-                if agree and float(visual.get("confidence") or 0) >= .80 and float(checklist.get("confidence") or 0) >= .80:
-                    identity["card_number"] = cnum
-                    identity["_card_number_status"] = "image + checklist"
-                elif strong_checklist and (not vnum or visual.get("ambiguous") or float(visual.get("confidence") or 0) < .70):
-                    identity["card_number"] = cnum
-                    identity["_card_number_status"] = "checklist"
-                else:
-                    identity["card_number"] = ""
-                    identity["_card_number_status"] = "unresolved"
-                    identity["confidence"] = min(float(identity.get("confidence") or 0), .79)
-                identity["_visual_number"] = vnum
-        
-        
-                identity["_checklist_number"] = cnum
-                identity["_checklist_reason"] = checklist.get("reason", "")
-                identity["_checklist_sources"] = checklist.get("sources", [])
-                st.session_state["scan_result"] = identity
-                st.session_state["scan_front"] = front
-                st.session_state["scan_back"] = back
-                st.session_state.pop("valuation", None)
-                st.session_state.pop("duplicate", None)
-            except Exception as exc:
-                st.error(f"Identification failed: {exc}")
-
+    
+           
        card = st.session_state.get("scan_result")
     if card:
         confidence = round(float(card.get("confidence") or 0) * 100)
