@@ -419,6 +419,9 @@ def reset_scan():
     st.session_state.pop("scan_result", None)
     st.session_state.pop("valuation", None)
     st.session_state.pop("duplicate", None)
+    sst.ession_state.pop("scan_front", None)
+    st.session_state.pop("scan_back", None)
+    
     st.session_state["scan_nonce"] = st.session_state.get("scan_nonce", 0) + 1
 
 # ---------- Auth UI ----------
