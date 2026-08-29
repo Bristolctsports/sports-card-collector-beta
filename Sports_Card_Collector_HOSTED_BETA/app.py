@@ -26,7 +26,6 @@ def secret(name, default=""):
 
 OPENAI_API_KEY = secret("OPENAI_API_KEY")
 OPENAI_MODEL = secret("OPENAI_MODEL", "gpt-5.6-terra")
-OPENAI_FAST_MODEL = secret("OPENAI_FAST_MODEL", "gpt-4.1-mini")
 SUPABASE_URL = secret("SUPABASE_URL").rstrip("/")
 SUPABASE_ANON_KEY = secret("SUPABASE_ANON_KEY")
 PHOTO_BUCKET = secret("PHOTO_BUCKET", "card-photos")
@@ -307,15 +306,12 @@ def analyze_card(front, back=None):
         "type": "input_text",
         "text": (
             "Identify this sports trading card accurately. Use both front and back when provided. "
-            "Do not invent unreadable details. CARD NUMBER means the catalog/checklist number for this exact card. "
-            "Never use stats, jersey numbers, years, set size, copyright numbers, print codes, or incidental numbers. "
-            "FIRST identify the exact year, manufacturer, and set/product from the complete front and back design. "
-            "Do not treat a large standalone number on the back as the catalog card number merely because it is prominent. "
-            "Only return card_number when its location, label, surrounding text, or confirmed set checklist supports it as the actual catalog/checklist number. "
-            "If the card's set/product can be identified with a year (for example '1989 Score'), return that year in the year field even if the year is not clearly printed on the card. "
-            "Identify the exact manufacturer, year, and set/product from visible card design, logos, borders, branding and back layout before inferring a card number. "
-            "Do not guess a set from the player's name, career year, statistics, or memory; if the exact set cannot be supported by the images, return set as 'Unknown'. "
-            "If uncertain, return card_number as an empty string. Condition is only a cautious visual description."
+"Read the BACK carefully for the printed catalog/checklist card number. "
+"CARD NUMBER means the catalog/checklist number assigned to this exact card, often printed near an edge, corner, copyright line, or card-number label. "
+"Do not confuse the card number with a jersey number, statistic, year, set size, copyright year, print code, or other incidental number. "
+"Never infer a card number from the set size. Visually read the actual printed number from the card. "
+            "If the card shows a checklist position such as '13 of 660', interpret it as card_number='13', NOT serial_number='13 of 660'. A checklist position is not a limited serial number. "
+"If the printed card number cannot be read confidently, return card_number as an empty string. Condition is only a cautious visual description."
         ),
     }]
     content.append({"type": "input_image", "image_url": image_to_data_url(front), "detail": "high"})
@@ -332,19 +328,23 @@ def verify_card_number(front, back, identification):
     content = [{
         "type": "input_text",
         "text": (
-            "Verify ONLY the exact catalog/checklist card number. Use the BACK as primary visual evidence. "
-            "Ignore stats, years, set size, jersey numbers, print codes, season totals and all incidental numbers. "
-            "A marking like '575 of 660' or '575/660' is a serial-number/print-run marker, NEVER the catalog/checklist card number. If that is the only number visible, return confirmed_card_number as blank and ambiguous=true. "
-            f"First-pass identity: player={identification.get('player','')}, year={identification.get('year','')}, "
-            f"manufacturer={identification.get('manufacturer','')}, set={identification.get('set','')}, "
-            f"candidate={identification.get('card_number','')}. If uncertain, return blank and ambiguous=true."
+            "Verify ONLY the exact catalog/checklist card number. Examine the BACK image very carefully. "
+"Visually locate and read the actual printed card number; do not infer or calculate it. "
+"Ignore stats, years, set size, jersey numbers, copyright years, print codes, season totals and all incidental numbers. "
+"The set size is NOT the card number. For example, a marking such as '13 of 660' means card_number='13', not '660'. "
+            "A phrase like '13 of 660' is a checklist position: card_number='13'. It is NOT a serial number, so serial_number must remain empty unless the card is explicitly marked as a limited serial-numbered card. "
+f"First-pass identity: player={identification.get('player','')}, year={identification.get('year','')}, "
+f"manufacturer={identification.get('manufacturer','')}, set={identification.get('set','')}, "
+f"candidate={identification.get('card_number','')}. "
+"If the printed card number is clearly readable, return that number even when it disagrees with the first-pass candidate. "
+"If it cannot be read confidently, return blank and ambiguous=true."
         ),
     }]
     content.append({"type": "input_image", "image_url": image_to_data_url(front), "detail": "high"})
     if back is not None:
         content.append({"type": "input_image", "image_url": image_to_data_url(back), "detail": "high"})
     r = openai_client().responses.create(
-        model=OPENAI_FAST_MODEL,
+        model=OPENAI_MODEL,
         input=[{"role": "user", "content": content}],
         text={"format": {"type": "json_schema", "name": "card_number_check", "strict": True, "schema": CARD_NUMBER_SCHEMA}},
     )
@@ -355,14 +355,13 @@ def checklist_crosscheck(identity, visual):
         "Cross-check the exact catalog/checklist number for a sports trading card using reliable web references. "
         f"Player={identity.get('player','')}; Year={identity.get('year','')}; "
         f"Manufacturer={identity.get('manufacturer','')}; Set={identity.get('set','')}; "
-        f"Visual candidate={visual.get('confirmed_card_number','') if not visual.get('ambiguous') else ''}. "
+        f"visual candidate={visual.get('confirmed_card_number','')}. "
         "Prefer manufacturer checklists, TCDB-like checklist references, PSA/Beckett/catalog references, COMC catalog pages, "
         "or similarly reputable sources. Ignore stats, set size, print codes, jersey numbers and serial numbering. "
-        "Only confirm when player, year, manufacturer, exact set/product, and card number all align with reliable checklist evidence. "
-        "If the set is generic, missing, conflicting, or the candidate card number is unusual, return exact_identity_confirmed=false instead of guessing."
+        "Only confirm when player, year, set and card number all align."
     )
     r = openai_client().responses.create(
-        model=OPENAI_FAST_MODEL,
+        model=OPENAI_MODEL,
         tools=[{"type": "web_search"}],
         input=prompt,
         text={"format": {"type": "json_schema", "name": "checklist_crosscheck", "strict": True, "schema": CARD_CHECKLIST_SCHEMA}},
@@ -516,118 +515,73 @@ with scan_tab:
             back = st.file_uploader("Choose back photo", type=["jpg","jpeg","png","webp"], key=f"back_up_{nonce}")
 
     if st.button("🔎 Identify Card", type="primary", disabled=front is None, use_container_width=True):
-       
-             
-                with st.spinner("Identifying and cross-checking the card number..."):
-                    identity = analyze_card(front, back)
-                    identity["year"] = clean_year(identity.get("year"))
-                    visual = verify_card_number(front, back, identity)
-        
-                    vnum = str(visual.get("confirmed_card_number") or "").strip()
-                    visual_conf = float(visual.get("confidence") or 0)
-                    visual_good = bool(vnum) and not visual.get("ambiguous") and visual_conf >= .85
-        
-                    checklist = {
-                        "exact_identity_confirmed": False,
-                        "confirmed_card_number": "",
-                        "confidence": 0,
-                        "reason": "Web checklist skipped — card number confidently verified from image.",
-                        "sources": [],
-                    }
-        
-                    if visual_good:
-                        identity["card_number"] = vnum
-                        identity["_card_number_status"] = "image"
-                    else:
-                        checklist = checklist_crosscheck(identity, visual)
-        
-                        cnum = str(checklist.get("confirmed_card_number") or "").strip()
-                        agree = (
-                            normalize_card_number(vnum)
-                            and normalize_card_number(vnum) == normalize_card_number(cnum)
-                        )
-                        strong_checklist = (
-                            checklist.get("exact_identity_confirmed")
-                            and float(checklist.get("confidence") or 0) >= .92
-                        )
-        
-                        if (
-                            agree
-                            and float(visual.get("confidence") or 0) >= .80
-                            and float(checklist.get("confidence") or 0) >= .80
-                        ):
-                            identity["card_number"] = cnum
-                            identity["_card_number_status"] = "image + checklist"
-                        elif (
-                            strong_checklist
-                            and (
-                                not vnum
-                                or visual.get("ambiguous")
-                                or float(visual.get("confidence") or 0) < .70    
-                            )
-                        ):
-                            identity["card_number"] = cnum
-                            identity["_card_number_status"] = "checklist"
-                        else:
-                            identity["card_number"] = ""
-                            identity["_card_number_status"] = "unresolved"
-                            identity["confidence"] = min(
-                                float(identity.get("confidence") or 0), .79
-                            )
-        
-                    identity["_visual_number"] = vnum
-                    identity["_checklist_number"] = str(
-                        checklist.get("confirmed_card_number") or ""
-                    ).strip()
-                    identity["_checklist_reason"] = checklist.get("reason", "")
-                    identity["_checklist_sources"] = checklist.get("sources", [])
-        
-                    st.session_state["scan_result"] = identity
-                    st.session_state["scan_front"] = front
-                    st.session_state["scan_back"] = back
-                    st.session_state.pop("valuation", None)
-                    st.session_state.pop("duplicate", None)
-                
-            
-           
-        card = st.session_state.get("scan_result")
-        if card:
-            confidence = round(float(card.get("confidence") or 0) * 100)
-            st.info(f"AI identification confidence: {confidence}%")
+        try:
+            with st.spinner("Identifying and cross-checking the card number..."):
+                identity = analyze_card(front, back)
+                identity["year"] = clean_year(identity.get("year"))
+                visual = verify_card_number(front, back, identity)
+                checklist = checklist_crosscheck(identity, visual)
 
-            if card.get("card_number"):
-                st.success(
-                    f"✅ Card # verified by {card.get('_card_number_status')}: "
-                    f"{card.get('card_number')}"
-                )
-            else:
-                st.warning(
-                    f"⚠️ Card number was not auto-confirmed. "
-                    f"Image candidate: {card.get('_visual_number') or 'none'}; "
-                    f"checklist candidate: {card.get('_checklist_number') or 'none'}."
-                )
+                vnum = str(visual.get("confirmed_card_number") or "").strip()
+                cnum = str(checklist.get("confirmed_card_number") or "").strip()
+                agree = normalize_card_number(vnum) and normalize_card_number(vnum) == normalize_card_number(cnum)
+                strong_checklist = checklist.get("exact_identity_confirmed") and float(checklist.get("confidence") or 0) >= .92
 
-            with st.expander("Card-number verification details"):
-                st.write(card.get("_checklist_reason") or "No additional detail.")
-                for s in card.get("_checklist_sources") or []:
-                    if s.get("url"):
-                        st.markdown(
-                            f"- [{s.get('title') or 'Reference'}]({s['url']})"
-                        )
+                if agree and float(visual.get("confidence") or 0) >= .80 and float(checklist.get("confidence") or 0) >= .80:
+                    identity["card_number"] = cnum
+                    identity["_card_number_status"] = "image + checklist"
+                elif strong_checklist and (not vnum or visual.get("ambiguous") or float(visual.get("confidence") or 0) < .70):
+                    identity["card_number"] = cnum
+                    identity["_card_number_status"] = "checklist"
+                else:
+                    identity["card_number"] = ""
+                    identity["_card_number_status"] = "unresolved"
+                    identity["confidence"] = min(float(identity.get("confidence") or 0), .79)
 
-            st.subheader("Confirm before adding")
-            a,b,c = st.columns(3)
-            with a:
-                sport = st.text_input("Sport", value=card.get("sport",""))
-                player = st.text_input("Player", value=card.get("player",""))
-                year = st.text_input("Year", value=card.get("year",""))
-                manufacturer = st.text_input("Manufacturer", value=card.get("manufacturer",""))
-           with b:
+                identity["_visual_number"] = vnum
+                identity["_checklist_number"] = cnum
+                identity["_checklist_reason"] = checklist.get("reason", "")
+                identity["_checklist_sources"] = checklist.get("sources", [])
+                st.session_state["scan_result"] = identity
+                st.session_state["scan_front"] = front
+                st.session_state["scan_back"] = back
+                st.session_state.pop("valuation", None)
+                st.session_state.pop("duplicate", None)
+        except Exception as exc:
+            st.error(f"Identification failed: {exc}")
+
+    card = st.session_state.get("scan_result")
+    if card:
+        confidence = round(float(card.get("confidence") or 0) * 100)
+        st.info(f"AI identification confidence: {confidence}%")
+
+        if card.get("card_number"):
+            st.success(f"✅ Card # verified by {card.get('_card_number_status')}: {card.get('card_number')}")
+        else:
+            st.warning(
+                f"⚠️ Card number was not auto-confirmed. Image candidate: {card.get('_visual_number') or 'none'}; "
+                f"checklist candidate: {card.get('_checklist_number') or 'none'}."
+            )
+
+        with st.expander("Card-number verification details"):
+            st.write(card.get("_checklist_reason") or "No additional detail.")
+            for s in card.get("_checklist_sources") or []:
+                if s.get("url"):
+                    st.markdown(f"- [{s.get('title') or 'Reference'}]({s['url']})")
+
+        st.subheader("Confirm before adding")
+        a,b,c = st.columns(3)
+        with a:
+            sport = st.text_input("Sport", value=card.get("sport",""))
+            player = st.text_input("Player", value=card.get("player",""))
+            year = st.text_input("Year", value=card.get("year",""))
+            manufacturer = st.text_input("Manufacturer", value=card.get("manufacturer",""))
+        with b:
             set_name = st.text_input("Set", value=card.get("set",""))
             card_number = st.text_input("Card #", value=card.get("card_number",""))
             rookie = st.selectbox("Rookie?", ["Yes","No","Unknown"], index=["Yes","No","Unknown"].index(card.get("rookie","Unknown")))
             parallel = st.text_input("Parallel / Variation", value=card.get("parallel_variation",""))
-           with c:
+        with c:
             serial = st.text_input("Serial #", value=card.get("serial_number",""))
             autograph = st.selectbox("Autograph?", ["Yes","No","Unknown"], index=["Yes","No","Unknown"].index(card.get("autograph","Unknown")))
             relic = st.selectbox("Relic?", ["Yes","No","Unknown"], index=["Yes","No","Unknown"].index(card.get("relic","Unknown")))
@@ -708,10 +662,10 @@ with scan_tab:
                     candidate["front_photo_path"] = front_path
                     candidate["back_photo_path"] = back_path
                     insert_card(token, candidate)
-                    st.session_state["just_added"] = f"Added {player} to your collection."
-                    reset_scan()
-                    st.rerun()
-                   
+                    st.success(f"Added {player} to your collection.")
+                    if st.button("📸 Scan Next Card", key="scan_next_after_add", type="primary", use_container_width=True):
+                        reset_scan()
+                        st.rerun()
             except Exception as exc:
                 st.error(f"Could not save card: {exc}")
 
