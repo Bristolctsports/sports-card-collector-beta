@@ -659,23 +659,23 @@ with scan_tab:
 
                 if dup:
                     st.session_state["duplicate"] = {"existing": dup, "candidate": candidate}
-                else:
-                    front_path = upload_photo(token, user_id, st.session_state.get("scan_front"), "front")
-                    back_path = upload_photo(token, user_id, st.session_state.get("scan_back"), "back") if st.session_state.get("scan_back") else ""
-                    candidate["front_photo_path"] = front_path
-                    candidate["back_photo_path"] = back_path
-                    insert_card(token, candidate)
-                    
-                  st.session_state["just_added"] = f"Added {player} to your collection."
-                  st.rerun()
-            except Exception as exc:
-                st.error(f"Could not save card: {exc}")
-                if st.session_state.get("just_added"):
-                st.success(st.session_state["just_added"])
-                if st.button("📸 Scan Next Card", key="scan_next_after_add", type="primary", use_container_width=True):
-                    st.session_state.pop("just_added", None)
-                    reset_scan()
-                    st.rerun()
+                  else:
+                front_path = upload_photo(token, user_id, st.session_state.get("scan_front"), "front")
+                back_path = upload_photo(token, user_id, st.session_state.get("scan_back"), "back") if st.session_state.get("scan_back") else ""
+                candidate["front_photo_path"] = front_path
+                candidate["back_photo_path"] = back_path
+                insert_card(token, candidate)
+                st.session_state["just_added"] = f"Added {player} to your collection."
+                st.rerun()
+
+         except Exception as exc:
+            st.error(f"Could not save card: {exc}")
+        if st.session_state.get("just_added"):
+            st.success(st.session_state["just_added"])
+            if st.button("📸 Scan Next Card", key="scan_next_after_add", type="primary", use_container_width=True):
+                st.session_state.pop("just_added", None)
+                reset_scan()
+                st.rerun()
 
         dup_state = st.session_state.get("duplicate")
         if dup_state:
