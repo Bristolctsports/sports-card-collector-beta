@@ -539,12 +539,12 @@ with scan_tab:
                 visual = verify_card_number(front, back, identity)
                 checklist = checklist_crosscheck(identity, visual)
                 if checklist.get("exact_identity_confirmed") and float(checklist.get("confidence") or 0) >= .80:
-                if checklist.get("confirmed_player"):
-                    identity["player"] = str(checklist.get("confirmed_player")).strip()
-                if checklist.get("confirmed_year"):
-                    identity["year"] = clean_year(checklist.get("confirmed_year"))
-                if checklist.get("confirmed_set"):
-                    identity["set"] = str(checklist.get("confirmed_set")).strip()
+                    if checklist.get("confirmed_player"):
+                        identity["player"] = str(checklist.get("confirmed_player")).strip()
+                    if checklist.get("confirmed_year"):
+                        identity["year"] = clean_year(checklist.get("confirmed_year"))
+                    if checklist.get("confirmed_set"):
+                        identity["set"] = str(checklist.get("confirmed_set")).strip()
 
                 vnum = str(visual.get("confirmed_card_number") or "").strip()
                 cnum = str(checklist.get("confirmed_card_number") or "").strip()
