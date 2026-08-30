@@ -73,8 +73,11 @@ CARD_NUMBER_SCHEMA = {
 CARD_CHECKLIST_SCHEMA = {
     "type": "object",
     "properties": {
-        "exact_identity_confirmed": {"type": "boolean"},
-        "confirmed_card_number": {"type": "string"},
+     "exact_identity_confirmed": {"type": "boolean"},
+    "confirmed_player": {"type": "string"},
+    "confirmed_year": {"type": "string"},
+    "confirmed_set": {"type": "string"},
+    "confirmed_card_number": {"type": "string"},
         "confidence": {"type": "number", "minimum": 0, "maximum": 1},
         "reason": {"type": "string"},
         "sources": {
@@ -87,7 +90,7 @@ CARD_CHECKLIST_SCHEMA = {
             },
         },
     },
-    "required": ["exact_identity_confirmed", "confirmed_card_number", "confidence", "reason", "sources"],
+   "required": ["exact_identity_confirmed", "confirmed_player", "confirmed_year", "confirmed_set", "confirmed_card_number", "confidence", "reason", "sources"],
     "additionalProperties": False,
 }
 
@@ -358,8 +361,11 @@ def checklist_crosscheck(identity, visual):
         f"visual candidate={visual.get('confirmed_card_number','')}. "
         "Prefer manufacturer checklists, TCDB-like checklist references, PSA/Beckett/catalog references, COMC catalog pages, "
         "or similarly reputable sources. Ignore stats, set size, print codes, jersey numbers and serial numbering. "
-        "Only confirm when player, year, set and card number all align."
-    )
+        "Determine the exact card identity from reliable checklist/catalog evidence. "
+        "Return the verified player, year, set, and card number in confirmed_player, confirmed_year, confirmed_set, and confirmed_card_number. "
+        "Do not simply repeat the supplied year or set if reliable checklist evidence shows they are wrong. "
+        "Use the photographed card, player, team, manufacturer, set clues, and card number to resolve the correct identity. "
+        "Set exact_identity_confirmed=true only when the verified player, year, set and card number all align with a real checklist entry."
     r = openai_client().responses.create(
         model=OPENAI_MODEL,
         tools=[{"type": "web_search"}],
@@ -531,6 +537,13 @@ with scan_tab:
                 identity["year"] = clean_year(identity.get("year"))
                 visual = verify_card_number(front, back, identity)
                 checklist = checklist_crosscheck(identity, visual)
+                if checklist.get("exact_identity_confirmed") and float(checklist.get("confidence") or 0) >= .80:
+                if checklist.get("confirmed_player"):
+                    identity["player"] = str(checklist.get("confirmed_player")).strip()
+                if checklist.get("confirmed_year"):
+                    identity["year"] = clean_year(checklist.get("confirmed_year"))
+                if checklist.get("confirmed_set"):
+                    identity["set"] = str(checklist.get("confirmed_set")).strip()
 
                 vnum = str(visual.get("confirmed_card_number") or "").strip()
                 cnum = str(checklist.get("confirmed_card_number") or "").strip()
