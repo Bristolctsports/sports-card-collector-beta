@@ -604,6 +604,7 @@ with scan_tab:
             try:
                 with st.spinner("Searching recent sold-card evidence..."):
                     val = find_value(current_card)
+                    st.write("DEBUG valuation:", val)
                     if valuation_matches(current_card, val):
                         st.session_state["valuation"] = val
                     else:
