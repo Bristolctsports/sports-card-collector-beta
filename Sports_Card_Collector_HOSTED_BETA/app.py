@@ -654,20 +654,20 @@ with scan_tab:
                         dup = e
                         break
 
-                if dup:
-                    st.session_state["duplicate"] = {"existing": dup, "candidate": candidate}
-                else:
-                    front_path = upload_photo(token, user_id, st.session_state.get("scan_front"), "front")
-                    back_path = upload_photo(token, user_id, st.session_state.get("scan_back"), "back") if st.session_state.get("scan_back") else ""
-                    candidate["front_photo_path"] = front_path
-                    candidate["back_photo_path"] = back_path
-                    insert_card(token, candidate)
-                    st.success(f"Added {player} to your collection.")
-                    if st.button("📸 Scan Next Card", key="scan_next_after_add", type="primary", use_container_width=True):
-                        reset_scan()
-                        st.rerun()
-            except Exception as exc:
-                st.error(f"Could not save card: {exc}")
+            if dup:
+                st.session_state["duplicate"] = {"existing": dup, "candidate": candidate}
+            else:
+                front_path = upload_photo(token, user_id, st.session_state.get("scan_front"), "front")
+                back_path = upload_photo(token, user_id, st.session_state.get("scan_back"), "back") if st.session_state.get("scan_back") else ""
+                candidate["front_photo_path"] = front_path
+                candidate["back_photo_path"] = back_path
+                insert_card(token, candidate)
+                st.success(f"Added {player} to your collection.")
+                if st.button("📸 Scan Next Card", key="scan_next_after_add", type="primary", use_container_width=True):
+                    reset_scan()
+                    st.rerun()
+        except Exception as exc:
+            st.error(f"Could not save card: {exc}")
 
         dup_state = st.session_state.get("duplicate")
         if dup_state:
