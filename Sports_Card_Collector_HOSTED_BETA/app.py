@@ -366,6 +366,7 @@ def checklist_crosscheck(identity, visual):
         "Do not simply repeat the supplied year or set if reliable checklist evidence shows they are wrong. "
         "Use the photographed card, player, team, manufacturer, set clues, and card number to resolve the correct identity. "
         "Set exact_identity_confirmed=true only when the verified player, year, set and card number all align with a real checklist entry."
+    )
     r = openai_client().responses.create(
         model=OPENAI_MODEL,
         tools=[{"type": "web_search"}],
