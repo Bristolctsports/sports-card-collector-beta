@@ -693,6 +693,7 @@ with scan_tab:
             with d3:
                 if st.button("Cancel", use_container_width=True):
                     st.session_state.pop("duplicate", None)
+                    reset_scan()
                     st.rerun()
 
 # ---------- Collection tab ----------
