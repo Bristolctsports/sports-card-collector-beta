@@ -603,6 +603,7 @@ with scan_tab:
         if st.button("💰 Find Value", disabled=not card_number.strip(), use_container_width=True):
             try:
                 with st.spinner("Searching recent sold-card evidence..."):
+                    st.write("DEBUG requested card:", current_card)
                     val = find_value(current_card)
                     st.write("DEBUG valuation:", val)
                     if valuation_matches(current_card, val):
