@@ -370,12 +370,22 @@ def checklist_crosscheck(identity, visual):
 
 def find_value(card):
     prompt = (
-        "Estimate the current raw-card market value using recent sold/completed sale evidence, not active asking prices. "
-        f"Exact card required: player={card.get('player','')}; year={card.get('year','')}; "
-        f"manufacturer={card.get('manufacturer','')}; set={card.get('set','')}; "
-        f"card number={card.get('card_number','')}; parallel/variation={card.get('parallel_variation','')}. "
-        "Do not use a comp unless the player, year, set and card number match. Exclude different parallels/variations. "
-        "If exact evidence is insufficient, exact_match=false and set estimated_value=0."
+    "Estimate the current raw-card market value using recent SOLD/COMPLETED sale evidence only. "
+    "Do not use active asking prices. "
+    f"TARGET CARD — player={card.get('player','')}; "
+    f"year={card.get('year','')}; manufacturer={card.get('manufacturer','')}; "
+    f"set={card.get('set','')}; card_number={card.get('card_number','')}; "
+    f"parallel_or_variation={card.get('parallel_variation','')}. "
+    "The TARGET YEAR is mandatory. Never substitute a card from a different year, even if the player, set, or card number looks similar. "
+    "The TARGET PLAYER and TARGET CARD NUMBER are mandatory. "
+    "First confirm through a reliable checklist/catalog that this exact player, year, set and card number combination exists. "
+    "Then search for sold/completed sales of that exact card. "
+    "Set names may contain harmless wording differences such as manufacturer names or the word Football, but the underlying product must be the same. "
+    "If the requested parallel/variation is blank, treat the card as the base version and do not use parallel sales. "
+    "Exclude different years, different players, different card numbers, different parallels/variations, graded cards when the target is raw, and unrelated sets. "
+    "If exact sold evidence cannot be confirmed, return exact_match=false, estimated_value=0, and last_sold_comp=0. "
+    "Never estimate from a similar card."
+
     )
     r = openai_client().responses.create(
         model=OPENAI_MODEL,
