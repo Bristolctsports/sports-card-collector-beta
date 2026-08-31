@@ -541,7 +541,33 @@ with scan_tab:
                 identity = analyze_card(front, back)
                 identity["year"] = clean_year(identity.get("year"))
                 visual = verify_card_number(front, back, identity)
-                checklist = checklist_crosscheck(identity, visual)
+                visual_num = str(visual.get("confirmed_card_number") or "").strip()
+                first_num = str(identity.get("card_number") or "").strip()
+                visual_conf = float(visual.get("confidence") or 0)
+                identity_conf = float(identity.get("confidence") or 0)
+
+                fast_path = (
+                    visual_num
+                    and first_num
+                    and not visual.get("ambiguous")
+                    and visual_conf >= .98
+                    and identity_conf >= .98
+                    and normalize_card_number(visual_num) == normalize_card_number(first_num)
+                )
+
+                if fast_path:
+                    checklist = {
+                        "exact_identity_confirmed": True,
+                        "confirmed_player": identity.get("player", ""),
+                        "confirmed_year": identity.get("year", ""),
+                        "confirmed_set": identity.get("set", ""),
+                        "confirmed_card_number": visual_num,
+                        "confidence": min(visual_conf, identity_conf),
+                        "reason": "High-confidence image verification; checklist web search skipped.",
+                        "sources": [],
+                    }
+                else:
+                    checklist = checklist_crosscheck(identity, visual)
                 confirmed_player = normalize_text(checklist.get("confirmed_player", ""))
                 photo_player = normalize_text(identity.get("player", ""))
 
