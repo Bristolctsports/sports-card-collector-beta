@@ -517,6 +517,8 @@ scan_tab, collection_tab = st.tabs(["📷 Scan Card", "📚 Collection"])
 # ---------- Scan tab ----------
 
 with scan_tab:
+    if st.session_state.pop("reset_requested", False):
+    reset_scan()
     nonce = st.session_state.get("scan_nonce", 0)
     source = st.radio("Photo source", ["Camera", "Photo Library / Upload"], horizontal=True)
 
@@ -696,8 +698,8 @@ with scan_tab:
             except Exception as exc:
                 st.error(f"Could not save card: {exc}")
             if st.button("📸 Scan Next Card", key="scan_next_after_add", type="primary", use_container_width=True):
-                reset_scan()
-                st.rerun()
+               st.session_state["reset_requested"] = True
+               st.rerun()
 
         dup_state = st.session_state.get("duplicate")
         if dup_state:
