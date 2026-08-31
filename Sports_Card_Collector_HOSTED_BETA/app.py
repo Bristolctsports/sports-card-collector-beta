@@ -518,7 +518,7 @@ scan_tab, collection_tab = st.tabs(["📷 Scan Card", "📚 Collection"])
 
 with scan_tab:
     if st.session_state.pop("reset_requested", False):
-    reset_scan()
+        reset_scan()
     nonce = st.session_state.get("scan_nonce", 0)
     source = st.radio("Photo source", ["Camera", "Photo Library / Upload"], horizontal=True)
 
