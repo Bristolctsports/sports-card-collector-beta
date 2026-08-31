@@ -694,10 +694,10 @@ with scan_tab:
                     
                     
             except Exception as exc:
-            st.error(f"Could not save card: {exc}")
-        if st.button("📸 Scan Next Card", key="scan_next_after_add", type="primary", use_container_width=True):
-            reset_scan()
-            st.rerun()
+                st.error(f"Could not save card: {exc}")
+            if st.button("📸 Scan Next Card", key="scan_next_after_add", type="primary", use_container_width=True):
+                reset_scan()
+                st.rerun()
 
         dup_state = st.session_state.get("duplicate")
         if dup_state:
