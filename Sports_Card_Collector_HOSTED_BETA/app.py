@@ -542,22 +542,27 @@ with scan_tab:
                 identity["year"] = clean_year(identity.get("year"))
                 visual = verify_card_number(front, back, identity)
                 checklist = checklist_crosscheck(identity, visual)
-                if checklist.get("exact_identity_confirmed") and float(checklist.get("confidence") or 0) >= .80:
-                    if checklist.get("confirmed_player"):
-                        identity["player"] = str(checklist.get("confirmed_player")).strip()
-                    if checklist.get("confirmed_year"):
-                        identity["year"] = clean_year(checklist.get("confirmed_year"))
-                    if checklist.get("confirmed_set"):
-                        identity["set"] = str(checklist.get("confirmed_set")).strip()
+                confirmed_player = normalize_text(checklist.get("confirmed_player", ""))
+                photo_player = normalize_text(identity.get("player", ""))
+
+                identity_conflict = bool(
+                    confirmed_player
+                    and photo_player
+                    and confirmed_player != photo_player
+                )
 
                 vnum = str(visual.get("confirmed_card_number") or "").strip()
                 cnum = str(checklist.get("confirmed_card_number") or "").strip()
                 agree = normalize_card_number(vnum) and normalize_card_number(vnum) == normalize_card_number(cnum)
-                strong_checklist = checklist.get("exact_identity_confirmed") and float(checklist.get("confidence") or 0) >= .92
+                strong_checklist = (
+                checklist.get("exact_identity_confirmed")
+                and float(checklist.get("confidence") or 0) >= .92
+                and not identity_conflict
+                )
 
-                if agree and float(visual.get("confidence") or 0) >= .80 and float(checklist.get("confidence") or 0) >= .80:
-                    identity["card_number"] = cnum
-                    identity["_card_number_status"] = "image + checklist"
+            if agree and not identity_conflict and float(visual.get("confidence") or 0) >= .80 and float(checklist.get("confidence") or 0) >= .80:
+                identity["card_number"] = cnum
+                identity["_card_number_status"] = "image + checklist"
                 elif strong_checklist and (not vnum or visual.get("ambiguous") or float(visual.get("confidence") or 0) < .70):
                     identity["card_number"] = cnum
                     identity["_card_number_status"] = "checklist"
