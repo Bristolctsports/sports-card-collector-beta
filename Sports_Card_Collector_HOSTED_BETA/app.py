@@ -551,7 +551,16 @@ with scan_tab:
                 st.success("Step 2 finished")
 
                 st.info("Step 3: cross-checking checklist...")
-                checklist = checklist_crosscheck(identity, visual)
+                checklist = {
+                    "exact_identity_confirmed": False,
+                    "confirmed_player": identity.get("player", ""),
+                    "confirmed_year": identity.get("year", ""),
+                    "confirmed_set": identity.get("set", ""),
+                    "confirmed_card_number": visual.get("confirmed_card_number", ""),
+                    "confidence": 0,
+                    "reason": "Checklist web verification skipped for fast scan.",
+                    "sources": [],
+                }
 
                 st.success("Step 3 finished")
                 confirmed_player = normalize_text(checklist.get("confirmed_player", ""))
