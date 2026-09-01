@@ -550,17 +550,29 @@ with scan_tab:
 
                 st.success("Step 2 finished")
 
-                st.info("Step 3: cross-checking checklist...")
-                checklist = {
-                    "exact_identity_confirmed": False,
-                    "confirmed_player": identity.get("player", ""),
-                    "confirmed_year": identity.get("year", ""),
-                    "confirmed_set": identity.get("set", ""),
-                    "confirmed_card_number": visual.get("confirmed_card_number", ""),
-                    "confidence": 0,
-                    "reason": "Checklist web verification skipped for fast scan.",
-                    "sources": [],
-                }
+                
+               st.info("Step 3: checking whether checklist verification is needed...")
+
+               needs_checklist = (
+                    float(identity.get("confidence") or 0) < .85
+                    or not identity.get("year")
+                    or not identity.get("set")
+                )
+
+                if needs_checklist:
+                    st.info("Low-confidence scan — verifying against checklist...")
+                    checklist = checklist_crosscheck(identity, visual)
+                else:
+                    checklist = {
+                        "exact_identity_confirmed": False,
+                        "confirmed_player": identity.get("player", ""),
+                        "confirmed_year": identity.get("year", ""),
+                        "confirmed_set": identity.get("set", ""),
+                        "confirmed_card_number": visual.get("confirmed_card_number", ""),
+                        "confidence": 0,
+                        "reason": "High-confidence scan; checklist web verification not required.",
+                        "sources": [],
+                    }
 
                 st.success("Step 3 finished")
                 confirmed_player = normalize_text(checklist.get("confirmed_player", ""))
