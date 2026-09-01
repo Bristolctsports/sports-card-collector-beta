@@ -539,10 +539,21 @@ with scan_tab:
         try:
             st.info("Identify button clicked — starting analysis")
             with st.spinner("Identifying and cross-checking the card number..."):
+                st.info("Step 1: analyzing card...")
                 identity = analyze_card(front, back)
+
+                st.success("Step 1 finished")
                 identity["year"] = clean_year(identity.get("year"))
+
+                st.info("Step 2: verifying card number...")
                 visual = verify_card_number(front, back, identity)
+
+                st.success("Step 2 finished")
+
+                st.info("Step 3: cross-checking checklist...")
                 checklist = checklist_crosscheck(identity, visual)
+
+                st.success("Step 3 finished")
                 confirmed_player = normalize_text(checklist.get("confirmed_player", ""))
                 photo_player = normalize_text(identity.get("player", ""))
 
