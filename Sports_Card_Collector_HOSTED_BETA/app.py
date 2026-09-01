@@ -512,8 +512,7 @@ with st.sidebar:
         st.rerun()
     st.markdown("**Photo tip:** fill the frame with one card, avoid glare, and photograph the back.")
 
-scan_tab, collection_tab = st.tabs(["📷 Scan Card", "📚 Collection"])
-
+scan_tab, collection_tab, beta_tab = st.tabs(["📸 Scan Card", "📚 Collection", "🧪 Beta Help"])
 # ---------- Scan tab ----------
 
 with scan_tab:
@@ -887,4 +886,44 @@ with collection_tab:
                 use_container_width=True,
             )
 
+
+
+with beta_tab:
+    st.header("🧪 Beta Testing Instructions")
+    st.write("Thanks for helping test the AI Sports Card Collector!")
+
+    st.markdown("""
+### What to test
+
+1. Scan the **front and back** of a sports card.
+2. Press **Identify Card**.
+3. Check the player, year, manufacturer, set, and card number.
+4. Correct anything that is wrong.
+5. Add the card to your collection.
+6. Try scanning **10-20 different cards** if possible.
+
+### Please watch for
+
+- Wrong player
+- Wrong year, set, or card number
+- Cards the app cannot identify
+- Error messages
+- Anything that takes too long
+- Anything confusing to use
+
+### Feedback
+
+Please take a **screenshot** when something goes wrong.
+
+When you finish testing, let us know:
+
+- How many cards you scanned
+- How many were identified correctly
+- Which cards were wrong
+- Anything that was confusing or slow
+- A feature you would like added
+- Your overall rating from **1–10**
+
+**Thank you for helping test the beta!**
+""")
 st.caption("Private beta. AI identification and market estimates can be wrong. Verify important details before buying, selling, grading or insuring cards.")
