@@ -922,7 +922,7 @@ When you finish testing, let us know:
 - Which cards were wrong
 - Anything that was confusing or slow
 - A feature you would like added
-- Your overall rating from **1–10**
+- Your overall rating from **1-10**
 
 **Thank you for helping test the beta!**
 """)
