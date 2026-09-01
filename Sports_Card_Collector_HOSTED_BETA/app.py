@@ -553,7 +553,7 @@ with scan_tab:
                 st.info("Step 3: checking whether checklist verification is needed...")
 
                 needs_checklist = (                                               
-                    float(identity.get("confidence") or 0) < .85
+                    float(identity.get("confidence") or 0) < .95
                     or not identity.get("year")
                     or not identity.get("set")
                 )
