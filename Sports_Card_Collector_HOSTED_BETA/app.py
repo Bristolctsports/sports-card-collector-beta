@@ -537,6 +537,7 @@ with scan_tab:
 
     if st.button("🔎 Identify Card", type="primary", disabled=front is None, use_container_width=True):
         try:
+            st.info("Identify button clicked — starting analysis")
             with st.spinner("Identifying and cross-checking the card number..."):
                 identity = analyze_card(front, back)
                 identity["year"] = clean_year(identity.get("year"))
