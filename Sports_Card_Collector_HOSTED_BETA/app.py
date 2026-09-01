@@ -580,16 +580,18 @@ with scan_tab:
                 and float(checklist.get("confidence") or 0) >= .92
                 and not identity_conflict
                 )
-
-                if vnum and not visual.get("ambiguous") and float(visual.get("confidence") or 0) >= .80:
-                    identity["card_number"] = vnum
-                    identity["_card_number_status"] = "image verified"
-                elif cnum:
-                    identity["card_number"] = cnum
-                    identity["_card_number_status"] = "candidate"
-                else:
-                    identity["card_number"] = ""
-                    identity["_card_number_status"] = "unresolved"
+            first_num = str(identity.get("card_number") or "").strip()
+            if (
+                vnum
+                and first_num
+                and not visual.get("ambiguous")
+                and normalize_card_number(vnum) == normalize_card_number(first_num)
+            ):
+                identity["card_number"] = vnum
+                identity["_card_number_status"] = "two image reads agree"
+            else:
+                identity["card_number"] = ""
+                identity["_card_number_status"] = "needs confirmation"
 
                 identity["_visual_number"] = vnum
                 identity["_checklist_number"] = cnum
