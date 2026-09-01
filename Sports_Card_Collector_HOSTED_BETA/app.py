@@ -582,14 +582,14 @@ with scan_tab:
                 )
 
                 if vnum and not visual.get("ambiguous") and float(visual.get("confidence") or 0) >= .80:
-        identity["card_number"] = vnum
-        identity["_card_number_status"] = "image verified"
-    elif cnum:
-        identity["card_number"] = cnum
-        identity["_card_number_status"] = "candidate"
-    else:
-        identity["card_number"] = ""
-        identity["_card_number_status"] = "unresolved"
+                    identity["card_number"] = vnum
+                    identity["_card_number_status"] = "image verified"
+                elif cnum:
+                    identity["card_number"] = cnum
+                    identity["_card_number_status"] = "candidate"
+                else:
+                    identity["card_number"] = ""
+                    identity["_card_number_status"] = "unresolved"
 
                 identity["_visual_number"] = vnum
                 identity["_checklist_number"] = cnum
