@@ -536,12 +536,12 @@ with scan_tab:
 
     if st.button("🔎 Identify Card", type="primary", disabled=front is None, use_container_width=True):
         try:
-            st.info("Identify button clicked — starting analysis")
+            st.info("🔍 Reading your card...")
             with st.spinner("Identifying and cross-checking the card number..."):
-                st.info("Step 1: analyzing card...")
+                st.info("🧠 Identifying player, set and card details...")
                 identity = analyze_card(front, back)
 
-                st.success("Step 1 finished")
+                st.success("✅ Card details read")
                 identity["year"] = clean_year(identity.get("year"))
 
                 if float(identity.get("confidence") or 0) >= .95 and identity.get("card_number"):
@@ -552,17 +552,17 @@ with scan_tab:
                         "ambiguous": False,
                     }
                 else:
-                    st.info("Double-checking card number...")
+                    st.info("🔎 Verifying card number...")
                     visual = verify_card_number(front, back, identity)
 
                 
-                st.info("Step 3: checking whether checklist verification is needed...")
+                st.info("🔍 Checking card details...")
 
                 needs_checklist = False
                 
 
                 if needs_checklist:
-                    st.info("Low-confidence scan — verifying against checklist...")
+                    st.info("🔎 Taking a closer look...")
                     checklist = checklist_crosscheck(identity, visual)
                 else:
                     checklist = {
@@ -576,7 +576,7 @@ with scan_tab:
                         "sources": [],
                     }
 
-                st.success("Step 3 finished")
+                st.success("✅ Card details checked")
                 confirmed_player = normalize_text(checklist.get("confirmed_player", ""))
                 photo_player = normalize_text(identity.get("player", ""))
 
