@@ -376,6 +376,38 @@ def checklist_crosscheck(identity, visual):
         text={"format": {"type": "json_schema", "name": "checklist_crosscheck", "strict": True, "schema": CARD_CHECKLIST_SCHEMA}},
     )
     return json.loads(r.output_text)
+def value_cache_key(card):
+    parts = [
+        card.get("player", ""),
+        card.get("year", ""),
+        card.get("manufacturer", ""),
+        card.get("set", ""),
+        card.get("card_number", ""),
+        card.get("parallel_variation", ""),
+    ]
+    return "|".join(normalize_text(x) for x in parts)
+def get_cached_value(card):
+    try:
+        cache_key = value_cache_key(card)
+        token = st.session_state.get("access_token")
+        r = requests.get(
+            f"{SUPABASE_URL}/rest/v1/card_value_cache",
+            headers=sb_headers(token),
+            params={
+                "select": "value_data",
+                "cache_key": f"eq.{cache_key}",
+                "limit": "1",
+            },
+            timeout=30,
+        )
+        if not r.ok:
+            return None
+        rows = r.json()
+        if rows:
+            return rows[0].get("value_data")
+    except Exception:
+        pass
+    return None
 
 def find_value(card):
     prompt = (
