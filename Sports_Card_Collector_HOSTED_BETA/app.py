@@ -545,12 +545,12 @@ with scan_tab:
                 identity["year"] = clean_year(identity.get("year"))
 
                 if float(identity.get("confidence") or 0) >= .95 and identity.get("card_number"):
-                visual = {
-                    "confirmed_card_number": identity.get("card_number", ""),
-                    "confidence": identity.get("confidence", 0),
-                    "evidence": "High-confidence first-pass identification.",
-                    "ambiguous": False,
-                }
+                    visual = {
+                        "confirmed_card_number": identity.get("card_number", ""),
+                        "confidence": identity.get("confidence", 0),
+                        "evidence": "High-confidence first-pass identification.",
+                        "ambiguous": False,
+                    }
             else:
                 st.info("Double-checking card number...")
                 visual = verify_card_number(front, back, identity)
