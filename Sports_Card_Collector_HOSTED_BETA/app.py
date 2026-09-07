@@ -317,7 +317,7 @@ def analyze_card(front, back=None):
 "If the printed card number cannot be read confidently, return card_number as an empty string. Condition is only a cautious visual description."
         ),
     }]
-    content.append({"type": "input_image", "image_url": image_to_data_url(front), "detail": "high"})
+    content.append({"type": "input_image", "image_url": image_to_data_url(front), "detail": "low")
     if back is not None:
         content.append({"type": "input_image", "image_url": image_to_data_url(back), "detail": "high"})
     r = openai_client().responses.create(
