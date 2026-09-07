@@ -551,9 +551,9 @@ with scan_tab:
                         "evidence": "High-confidence first-pass identification.",
                         "ambiguous": False,
                     }
-            else:
-                st.info("Double-checking card number...")
-                visual = verify_card_number(front, back, identity)
+                else:
+                    st.info("Double-checking card number...")
+                    visual = verify_card_number(front, back, identity)
 
                 
                 st.info("Step 3: checking whether checklist verification is needed...")
