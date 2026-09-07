@@ -730,20 +730,20 @@ with scan_tab:
         if st.button("💰 Find Card Value", disabled=not card_number.strip(), use_container_width=True):
             try:
                 with st.spinner("Searching recent sold-card evidence..."):
-                   cached_val = get_cached_value(current_card)
-                   if cached_val: 
-                    val = cached_val
-                   else:   
-                        val = find_value(current_card)
-                        if valuation_matches(current_card, val):
-                            save_cached_value(current_card, val)
+                               cached_val = get_cached_value(current_card)
+            if cached_val:
+                val = cached_val
+            else:
+                val = find_value(current_card)
+                if valuation_matches(current_card, val):
+                    save_cached_value(current_card, val)
 
-                    st.write("DEBUG value result:", val)
-                    if valuation_matches(current_card, val):
-                        st.session_state["valuation"] = val
-                    else:
-                        st.session_state["valuation"] = {"exact_match": False}
-                        st.warning("Exact card match not confirmed — value was not applied.")
+            st.write("DEBUG value result:", val)
+            if valuation_matches(current_card, val):
+                st.session_state["valuation"] = val
+            else:
+                st.session_state["valuation"] = {"exact_match": False}
+                st.warning("Exact card match not confirmed — value was not applied.")
             except Exception as exc:
                 st.error(f"Value lookup failed: {exc}")
 
