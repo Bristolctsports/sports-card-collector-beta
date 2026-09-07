@@ -406,11 +406,11 @@ def valuation_matches(card, val):
     if not val.get("exact_match"):
         return False
     checks = [
-        (normalize_text(card.get("player")), normalize_text(val.get("matched_player"))),
-        (normalize_text(card.get("year")), normalize_text(val.get("matched_year"))),
-        (normalize_text(card.get("set")), normalize_text(val.get("matched_set"))),
-        (normalize_card_number(card.get("card_number")), normalize_card_number(val.get("matched_card_number"))),
-    ]
+    (normalize_text(card.get("player")), normalize_text(val.get("matched_player"))),
+    (normalize_text(card.get("year")), normalize_text(val.get("matched_year"))),
+    (normalize_card_number(card.get("card_number")), normalize_card_number(val.get("matched_card_number"))),
+]
+    
     if any(a != b or not a for a, b in checks):
         return False
     requested_parallel = normalize_text(card.get("parallel_variation"))
