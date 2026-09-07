@@ -408,7 +408,26 @@ def get_cached_value(card):
     except Exception:
         pass
     return None
+def save_cached_value(card, value_data):
+    try:
+        cache_key = value_cache_key(card)
+        token = st.session_state.get("access_token")
+        headers = sb_headers(token)
+        headers["Prefer"] = "resolution=merge-duplicates,return=minimal"
 
+        requests.post(
+            f"{SUPABASE_URL}/rest/v1/card_value_cache",
+            headers=headers,
+            params={"on_conflict": "cache_key"},
+            json={
+                "cache_key": cache_key,
+                "value_data": value_data,
+                "updated_at": datetime.now().astimezone().isoformat(),
+            },
+            timeout=30,
+        )
+    except Exception:
+        pass
 def find_value(card):
     prompt = (
     "Find recent SOLD/COMPLETED sales for this exact raw sports card. "
