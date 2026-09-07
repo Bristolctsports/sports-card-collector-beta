@@ -379,21 +379,19 @@ def checklist_crosscheck(identity, visual):
 
 def find_value(card):
     prompt = (
-    "Estimate the current raw-card market value using recent SOLD/COMPLETED sale evidence only. "
+    "Find recent SOLD/COMPLETED sales for this exact raw sports card. "
+    f"Player: {card.get('player','')}; "
+    f"Year: {card.get('year','')}; "
+    f"Manufacturer: {card.get('manufacturer','')}; "
+    f"Set: {card.get('set','')}; "
+    f"Card number: {card.get('card_number','')}; "
+    f"Parallel/variation: {card.get('parallel_variation','')}. "
+    "Trust this card identity. Do not perform a separate checklist verification. "
+    "Search directly for sold/completed sales of this exact card. "
     "Do not use active asking prices. "
-    f"TARGET CARD — player={card.get('player','')}; "
-    f"year={card.get('year','')}; manufacturer={card.get('manufacturer','')}; "
-    f"set={card.get('set','')}; card_number={card.get('card_number','')}; "
-    f"parallel_or_variation={card.get('parallel_variation','')}. "
-    "The TARGET YEAR is mandatory. Never substitute a card from a different year, even if the player, set, or card number looks similar. "
-    "The TARGET PLAYER and TARGET CARD NUMBER are mandatory. "
-    "First confirm through a reliable checklist/catalog that this exact player, year, set and card number combination exists. "
-    "Then search for sold/completed sales of that exact card. "
-    "Set names may contain harmless wording differences such as manufacturer names or the word Football, but the underlying product must be the same. "
-    "If the requested parallel/variation is blank, treat the card as the base version and do not use parallel sales. "
-    "Exclude different years, different players, different card numbers, different parallels/variations, graded cards when the target is raw, and unrelated sets. "
-    "If exact sold evidence cannot be confirmed, return exact_match=false, estimated_value=0, and last_sold_comp=0. "
-    "Never estimate from a similar card."
+    "Do not use different players, years, card numbers, parallels, graded cards, or unrelated sets. "
+    "If exact sold evidence exists, return exact_match=true and the best current raw-card value estimate. "
+    "If no reliable exact sold evidence exists, return exact_match=false."
 
     )
     r = openai_client().responses.create(
