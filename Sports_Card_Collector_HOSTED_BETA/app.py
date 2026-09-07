@@ -152,9 +152,11 @@ def safe_float(value):
 def image_to_jpeg_bytes(uploaded_file):
     raw = uploaded_file.getvalue()
     image = Image.open(io.BytesIO(raw)).convert("RGB")
+    image.thumbnail((1600, 1600))
     out = io.BytesIO()
-    image.save(out, format="JPEG", quality=92)
+    image.save(out, format="JPEG", quality=80, optimize=True)
     return out.getvalue()
+    
 
 def image_to_data_url(uploaded_file):
     data = image_to_jpeg_bytes(uploaded_file)
@@ -317,7 +319,7 @@ def analyze_card(front, back=None):
 "If the printed card number cannot be read confidently, return card_number as an empty string. Condition is only a cautious visual description."
         ),
     }]
-    content.append({"type": "input_image", "image_url": image_to_data_url(front), "detail": "low"})
+    content.append({"type": "input_image", "image_url": image_to_data_url(front), "detail": "low")
     if back is not None:
         content.append({"type": "input_image", "image_url": image_to_data_url(back), "detail": "high"})
     r = openai_client().responses.create(
