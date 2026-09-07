@@ -673,7 +673,7 @@ with scan_tab:
             "condition": condition, "notes": notes,
         }
 
-        if st.button("💰 Card Values — Coming Soon", disabled=True, use_container_width=True):
+        if st.button("💰 Find Card Value", disabled=not card_number.strip(), use_container_width=True):
             try:
                 with st.spinner("Searching recent sold-card evidence..."):
                     
