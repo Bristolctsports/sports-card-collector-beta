@@ -398,7 +398,7 @@ def find_value(card):
     )
     r = openai_client().responses.create(
         model=OPENAI_MODEL,
-        tools=[{"type": "web_search"}],
+        tools=[{"type": "web_search", "search_context_size": "low"}],
         input=prompt,
         text={"format": {"type": "json_schema", "name": "card_value", "strict": True, "schema": VALUE_SCHEMA}},
     )
