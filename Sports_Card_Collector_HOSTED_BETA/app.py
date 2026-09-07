@@ -601,20 +601,20 @@ with scan_tab:
                 )
             first_num = str(identity.get("card_number") or "").strip()
 
-                if float(identity.get("confidence") or 0) >= .95 and first_num:
-                    identity["card_number"] = first_num
-                    identity["_card_number_status"] = "high-confidence image read"
-                elif (
-                    vnum
-                    and first_num
-                    and not visual.get("ambiguous")
-                    and normalize_card_number(vnum) == normalize_card_number(first_num)
-                ):
-                    identity["card_number"] = vnum
-                    identity["_card_number_status"] = "two image reads agree"
-                else:
-                    identity["card_number"] = ""
-                    identity["_card_number_status"] = "needs confirmation"
+            if float(identity.get("confidence") or 0) >= .95 and first_num:
+                identity["card_number"] = first_num
+                identity["_card_number_status"] = "high-confidence image read"
+            elif (
+                vnum
+                and first_num
+                and not visual.get("ambiguous")
+                and normalize_card_number(vnum) == normalize_card_number(first_num)
+            ):
+                identity["card_number"] = vnum
+                identity["_card_number_status"] = "two image reads agree"
+            else:
+                identity["card_number"] = ""
+                identity["_card_number_status"] = "needs confirmation"
 
             identity["_visual_number"] = vnum
             identity["_checklist_number"] = cnum
