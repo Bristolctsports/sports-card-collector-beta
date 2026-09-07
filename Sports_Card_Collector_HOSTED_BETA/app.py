@@ -730,8 +730,14 @@ with scan_tab:
         if st.button("💰 Find Card Value", disabled=not card_number.strip(), use_container_width=True):
             try:
                 with st.spinner("Searching recent sold-card evidence..."):
-                    
-                    val = find_value(current_card)
+                   cached_val = get_cached_value(current_card)
+                   if cached_val: 
+                    val = cached_val
+                   else:   
+                        val = find_value(current_card)
+                        if valuation_matches(current_card, val):
+                            save_cached_value(current_card, val)
+
                     st.write("DEBUG value result:", val)
                     if valuation_matches(current_card, val):
                         st.session_state["valuation"] = val
