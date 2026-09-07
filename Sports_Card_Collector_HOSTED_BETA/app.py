@@ -544,11 +544,18 @@ with scan_tab:
                 st.success("Step 1 finished")
                 identity["year"] = clean_year(identity.get("year"))
 
-                st.info("Step 2: verifying card number...")
+                if float(identity.get("confidence") or 0) >= .95 and identity.get("card_number"):
+                visual = {
+                    "confirmed_card_number": identity.get("card_number", ""),
+                    "confidence": identity.get("confidence", 0),
+                    "evidence": "High-confidence first-pass identification.",
+                    "ambiguous": False,
+                }
+            else:
+                st.info("Double-checking card number...")
                 visual = verify_card_number(front, back, identity)
 
-                st.success("Step 2 finished")
-
+                
                 st.info("Step 3: checking whether checklist verification is needed...")
 
                 needs_checklist = (                                               
