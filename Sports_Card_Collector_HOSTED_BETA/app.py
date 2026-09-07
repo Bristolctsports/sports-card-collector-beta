@@ -391,7 +391,10 @@ def find_value(card):
     "Do not use active asking prices. "
     "Do not use different players, years, card numbers, parallels, graded cards, or unrelated sets. "
     "If exact sold evidence exists, return exact_match=true and the best current raw-card value estimate. "
-    "If no reliable exact sold evidence exists, return exact_match=false."
+    "If no reliable exact sold evidence exists, do one fallback search using the same player, set, and card number without requiring the target year. "
+    "If that reveals the same card identity in a different year, return exact_match=false and put the ACTUAL year and identity found into the matched_player, matched_year, matched_set, matched_card_number, and matched_parallel_variation fields. "
+    "Do not assign a value to a different-year card; keep estimated_value=0 and explain the identity mismatch in evidence_summary. "
+    "If no reliable card identity can be found at all, return exact_match=false."
 
     )
     r = openai_client().responses.create(
