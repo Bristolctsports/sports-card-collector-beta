@@ -614,7 +614,7 @@ with scan_tab:
                         st.info("🔎 Verifying card number...")
                         visual = verify_card_number(front, back, identity)
                         if visual.get("confirmed_year"):
-                        identity["year"] = clean_year(visual.get("confirmed_year"))    
+                            identity["year"] = clean_year(visual.get("confirmed_year"))    
                 
                 st.info("🔍 Checking card details...")
 
