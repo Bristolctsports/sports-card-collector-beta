@@ -603,7 +603,7 @@ with scan_tab:
                 st.success("✅ Card details read")
                 identity["year"] = clean_year(identity.get("year"))
 
-                if float(identity.get("confidence") or 0) >= .99 and identity.get("card_number"):
+                if float(identity.get("confidence") or 0) >= .95 and identity.get("card_number"):
                     visual = {
                         "confirmed_card_number": identity.get("card_number", ""),
                         "confidence": identity.get("confidence", 0),
@@ -613,9 +613,7 @@ with scan_tab:
                 else:
                         st.info("🔎 Verifying card number...")
                         visual = verify_card_number(front, back, identity)
-                        st.write("DEBUG verification result:", visual)
-                        if visual.get("confirmed_year"):
-                            identity["year"] = clean_year(visual.get("confirmed_year"))    
+                        
                 
                 st.info("🔍 Checking card details...")
 
