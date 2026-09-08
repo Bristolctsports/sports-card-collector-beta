@@ -613,6 +613,7 @@ with scan_tab:
                 else:
                         st.info("🔎 Verifying card number...")
                         visual = verify_card_number(front, back, identity)
+                        st.write("DEBUG verification result:", visual)
                         if visual.get("confirmed_year"):
                             identity["year"] = clean_year(visual.get("confirmed_year"))    
                 
