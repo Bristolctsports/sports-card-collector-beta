@@ -341,7 +341,7 @@ def verify_card_number(front, back, identification):
             "Ignore set size, jersey numbers, copyright years, print codes and unrelated incidental numbers when reading the card number. You MAY use season/statistics text to determine confirmed_year. "
             "The set size is NOT the card number. For example, a marking such as '13 of 660' means card_number='13', not '660'. "
             "A phrase like '13 of 660' is a checklist position: card_number='13'. It is NOT a serial number, so serial_number must remain empty unless the card is explicitly marked as a limited serial-numbered card. "
-           f"First-pass identity: player={identification.get('player','')}, year={identification.get('year','')}, "
+           f"First-pass identity: player={identification.get('player','')}. Do not use the first-pass year; determine confirmed_year independently from the card images. "
            f"manufacturer={identification.get('manufacturer','')}, set={identification.get('set','')}, "
            f"candidate={identification.get('card_number','')}. "
            "If the printed card number is clearly readable, return that number even when it disagrees with the first-pass candidate. "
