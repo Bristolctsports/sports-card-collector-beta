@@ -336,7 +336,7 @@ def verify_card_number(front, back, identification):
         "type": "input_text",
         "text": (
             "Verify ONLY the exact catalog/checklist card number. Examine the BACK image very carefully. "
-            "Also determine the card's RELEASE YEAR from the back image. Return it as confirmed_year. Do not simply copy the first-pass year. Use season/statistics text and set clues; a card discussing the 2025 season may be a 2026 release. "
+            "Determine confirmed_year only from explicit printed year/release information or unmistakable set-design evidence. Do NOT infer the release year by adding one year to season statistics or biography text. If the release year cannot be determined reliably from the images, return confirmed_year as an empty string. "
             "Visually locate and read the actual printed card number; do not infer or calculate it. "
             "Ignore set size, jersey numbers, copyright years, print codes and unrelated incidental numbers when reading the card number. You MAY use season/statistics text to determine confirmed_year. "
             "The set size is NOT the card number. For example, a marking such as '13 of 660' means card_number='13', not '660'. "
