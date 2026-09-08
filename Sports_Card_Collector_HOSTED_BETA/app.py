@@ -611,9 +611,7 @@ with scan_tab:
                 else:
                         st.info("🔎 Verifying card number...")
                         visual = verify_card_number(front, back, identity)
-                    verified_year = verify_card_year(identity, visual)
-                    if verified_year:
-                        identity["year"] = verified_year
+                     
                 
                 st.info("🔍 Checking card details...")
 
