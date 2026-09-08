@@ -62,11 +62,12 @@ CARD_NUMBER_SCHEMA = {
     "type": "object",
     "properties": {
         "confirmed_card_number": {"type": "string"},
+        "confirmed_year": {"type": "string"},
         "confidence": {"type": "number", "minimum": 0, "maximum": 1},
         "evidence": {"type": "string"},
         "ambiguous": {"type": "boolean"},
     },
-    "required": ["confirmed_card_number", "confidence", "evidence", "ambiguous"],
+    "required": ["confirmed_card_number", "confirmed_year", "confidence", "evidence", "ambiguous"],
     "additionalProperties": False,
 }
 
@@ -335,15 +336,16 @@ def verify_card_number(front, back, identification):
         "type": "input_text",
         "text": (
             "Verify ONLY the exact catalog/checklist card number. Examine the BACK image very carefully. "
-"Visually locate and read the actual printed card number; do not infer or calculate it. "
-"Ignore stats, years, set size, jersey numbers, copyright years, print codes, season totals and all incidental numbers. "
-"The set size is NOT the card number. For example, a marking such as '13 of 660' means card_number='13', not '660'. "
+            "Also determine the card's RELEASE YEAR from the back image. Return it as confirmed_year. Do not simply copy the first-pass year. Use season/statistics text and set clues; a card discussing the 2025 season may be a 2026 release. "
+            "Visually locate and read the actual printed card number; do not infer or calculate it. "
+            "Ignore set size, jersey numbers, copyright years, print codes and unrelated incidental numbers when reading the card number. You MAY use season/statistics text to determine confirmed_year. "
+            "The set size is NOT the card number. For example, a marking such as '13 of 660' means card_number='13', not '660'. "
             "A phrase like '13 of 660' is a checklist position: card_number='13'. It is NOT a serial number, so serial_number must remain empty unless the card is explicitly marked as a limited serial-numbered card. "
-f"First-pass identity: player={identification.get('player','')}, year={identification.get('year','')}, "
-f"manufacturer={identification.get('manufacturer','')}, set={identification.get('set','')}, "
-f"candidate={identification.get('card_number','')}. "
-"If the printed card number is clearly readable, return that number even when it disagrees with the first-pass candidate. "
-"If it cannot be read confidently, return blank and ambiguous=true."
+           f"First-pass identity: player={identification.get('player','')}, year={identification.get('year','')}, "
+           f"manufacturer={identification.get('manufacturer','')}, set={identification.get('set','')}, "
+           f"candidate={identification.get('card_number','')}. "
+           "If the printed card number is clearly readable, return that number even when it disagrees with the first-pass candidate. "
+           "If it cannot be read confidently, return blank and ambiguous=true."
         ),
     }]
     content.append({"type": "input_image", "image_url": image_to_data_url(front), "detail": "high"})
@@ -601,7 +603,7 @@ with scan_tab:
                 st.success("✅ Card details read")
                 identity["year"] = clean_year(identity.get("year"))
 
-                if float(identity.get("confidence") or 0) >= .95 and identity.get("card_number"):
+                if float(identity.get("confidence") or 0) >= .99 and identity.get("card_number"):
                     visual = {
                         "confirmed_card_number": identity.get("card_number", ""),
                         "confidence": identity.get("confidence", 0),
@@ -611,7 +613,8 @@ with scan_tab:
                 else:
                         st.info("🔎 Verifying card number...")
                         visual = verify_card_number(front, back, identity)
-                     
+                        if visual.get("confirmed_year"):
+                        identity["year"] = clean_year(visual.get("confirmed_year"))    
                 
                 st.info("🔍 Checking card details...")
 
