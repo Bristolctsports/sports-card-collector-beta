@@ -377,24 +377,7 @@ def checklist_crosscheck(identity, visual):
         text={"format": {"type": "json_schema", "name": "checklist_crosscheck", "strict": True, "schema": CARD_CHECKLIST_SCHEMA}},
     )
     return json.loads(r.output_text)
-    def verify_card_year(identity, visual):
-    prompt = (
-        "Determine the release year of this exact sports card using reliable checklist/catalog web evidence. "
-        f"Player: {identity.get('player','')}; "
-        f"Manufacturer: {identity.get('manufacturer','')}; "
-        f"Set: {identity.get('set','')}; "
-        f"Card number: {visual.get('confirmed_card_number','')}. "
-        "Do NOT use or assume any previously guessed year. "
-        "Match the player, set, manufacturer, and card number. "
-        "Return only the four-digit release year and nothing else."
-    )
-    r = openai_client().responses.create(
-        model=OPENAI_MODEL,
-        tools=[{"type": "web_search", "search_context_size": "low"}],
-        input=prompt,
-    )
-    match = re.search(r"\b(?:19|20)\d{2}\b", r.output_text or "")
-    return match.group(0) if match else ""
+    
 def value_cache_key(card):
     parts = [
         card.get("player", ""),
