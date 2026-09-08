@@ -433,6 +433,7 @@ def find_value(card):
     "Find recent SOLD/COMPLETED sales for this exact raw sports card. "
     f"Player: {card.get('player','')}; "
     f"Year: {card.get('year','')}; "
+    f"AUTHORITATIVE TARGET YEAR: {card.get('year','')}. Never describe the target card as any other year. "
     f"Manufacturer: {card.get('manufacturer','')}; "
     f"Set: {card.get('set','')}; "
     f"Card number: {card.get('card_number','')}; "
