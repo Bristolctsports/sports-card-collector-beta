@@ -614,7 +614,7 @@ with scan_tab:
                 
                 st.info("🔍 Checking card details...")
 
-                needs_checklist = False
+                needs_checklist = float(identity.get("confidence") or 0) < .95
                 
 
                 if needs_checklist:
