@@ -312,7 +312,7 @@ def analyze_card(front, back=None):
         "text": (
             "Identify this sports trading card accurately. Use both front and back when provided. "
 "Read the BACK carefully for the printed catalog/checklist card number. "
-"Determine the YEAR from printed copyright, set, and back-of-card text when visible. Do not guess the year from design alone. "
+"Determine the card's RELEASE YEAR, not merely a copyright year. Use the set identity and the most recent season or statistics described on the back. For example, if the back discusses the player's 2025 season, the card may be a 2026 release. Do not treat an older copyright number as the release year by itself. "
 "CARD NUMBER means the catalog/checklist number assigned to this exact card, often printed near an edge, corner, copyright line, or card-number label. "
 "Do not confuse the card number with a jersey number, statistic, year, set size, copyright year, print code, or other incidental number. "
 "Never infer a card number from the set size. Visually read the actual printed number from the card. "
