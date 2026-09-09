@@ -311,14 +311,12 @@ def analyze_card(front, back=None):
     content = [{
         "type": "input_text",
         "text": (
-            "Identify this sports trading card accurately. Use both front and back when provided. "
-"Read the BACK carefully for the printed catalog/checklist card number. "
-"Determine the card's RELEASE YEAR, not merely a copyright year. Use the set identity and the most recent season or statistics described on the back. For example, if the back discusses the player's 2025 season, the card may be a 2026 release. Do not treat an older copyright number as the release year by itself. "
-"CARD NUMBER means the catalog/checklist number assigned to this exact card, often printed near an edge, corner, copyright line, or card-number label. "
-"Do not confuse the card number with a jersey number, statistic, year, set size, copyright year, print code, or other incidental number. "
-"Never infer a card number from the set size. Visually read the actual printed number from the card. "
-            "If the card shows a checklist position such as '13 of 660', interpret it as card_number='13', NOT serial_number='13 of 660'. A checklist position is not a limited serial number. "
-"If the printed card number cannot be read confidently, return card_number as an empty string. Condition is only a cautious visual description."
+                            "Identify this sports trading card accurately. Use both front and back when provided. "
+                "Read the actual printed catalog/checklist CARD NUMBER. Prefer the FRONT if it is visibly printed there; otherwise read it from the BACK. "
+                "For the year field, read the explicit 4-digit copyright/printed year from the BACK of the card. "
+                "Do NOT infer or calculate the year from statistics, season dates, biography text, player history, set design, or release patterns. "
+                "If the printed card number or printed year cannot be read clearly, return that field as an empty string rather than guessing. "
+                "Do not confuse the card number with a jersey number, statistic, serial/print-run number, set size, or other incidental number. "
         ),
     }]
     content.append({"type": "input_image", "image_url": image_to_data_url(front), "detail": "low"})
