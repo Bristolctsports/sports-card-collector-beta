@@ -663,7 +663,7 @@ with scan_tab:
                 and normalize_card_number(vnum) == normalize_card_number(first_num)
             ):
                 identity["card_number"] = vnum
-                identity["_card_number_status"] = "two image reads agree"
+                identity["card_number_status"] = "confirmed from card image"
             else:
                 identity["card_number"] = ""
                 identity["_card_number_status"] = "needs confirmation"
