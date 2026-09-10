@@ -36,6 +36,7 @@ CARD_SCHEMA = {
         "sport": {"type": "string"},
         "player": {"type": "string"},
         "year": {"type": "string"},
+        "copyright_year": {"type": "string"},
         "manufacturer": {"type": "string"},
         "set": {"type": "string"},
         "card_number": {"type": "string"},
@@ -51,7 +52,7 @@ CARD_SCHEMA = {
         "notes": {"type": "string"},
     },
     "required": [
-        "sport", "player", "year", "manufacturer", "set", "card_number",
+        "sport", "player", "year", "copyright_year", "manufacturer", "set", "card_number",
         "rookie", "parallel_variation", "serial_number", "autograph", "relic",
         "grading_company", "grade", "condition", "confidence", "notes"
     ],
@@ -313,7 +314,7 @@ def analyze_card(front, back=None):
         "text": (
                             "Identify this sports trading card accurately. Use both front and back when provided. "
                 "Read the actual printed catalog/checklist CARD NUMBER. Prefer the FRONT if it is visibly printed there; otherwise read it from the BACK. "
-                "For the year field, return an empty string. Do not determine or infer the release year during image identification. "
+                "For the year field, return an empty string. For copyright_year, read the explicit 4-digit copyright year printed on the BACK of the card. If the copyright year cannot be read clearly, return copyright_year as an empty string rather than guessing. "
                 "If the printed card number cannot be read clearly, return card_number as an empty string rather than guessing. "
                 "Do not confuse the card number with a jersey number, statistic, serial/print-run number, set size, or other incidental number. "
         ),
