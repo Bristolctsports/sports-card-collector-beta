@@ -95,7 +95,16 @@ CARD_CHECKLIST_SCHEMA = {
    "required": ["exact_identity_confirmed", "confirmed_player", "confirmed_year", "confirmed_set", "confirmed_card_number", "confidence", "reason", "sources"],
     "additionalProperties": False,
 }
-
+YEAR_RESOLUTION_SCHEMA = {
+    "type": "object",
+    "properties": {
+        "confirmed_year": {"type": "string"},
+        "confidence": {"type": "number", "minimum": 0, "maximum": 1},
+        "reason": {"type": "string"},
+    },
+    "required": ["confirmed_year", "confidence", "reason"],
+    "additionalProperties": False,
+}
 VALUE_SCHEMA = {
     "type": "object",
     "properties": {
@@ -378,6 +387,29 @@ def checklist_crosscheck(identity, visual):
     )
     return json.loads(r.output_text)
     
+def resolve_card_year(card):
+    prompt = (
+        "Determine the actual release year of this exact sports card. "
+        f"Player: {card.get('player','')}; "
+        f"Manufacturer: {card.get('manufacturer','')}; "
+        f"Set: {card.get('set','')}; "
+        f"Card number: {card.get('card_number','')}; "
+        f"Copyright year printed on back: {card.get('copyright_year','')}. "
+        "Use the exact player, set, and card number as the primary identity. "
+        "The copyright year is only a clue and may differ from the actual release year. "
+        "Do not infer the release year from player statistics or biography text. "
+        "Return an empty confirmed_year if the exact release year cannot be determined reliably."
+    )
+
+    r = openai_client().responses.create(
+        model=OPENAI_MODEL,
+        tools=[{"type": "web_search", "search_context_size": "low"}],
+        input=prompt,
+        text={"format": {"type": "json_schema", "name": "year_resolution", "strict": True, "schema": YEAR_RESOLUTION_SCHEMA}},
+    )
+
+    return json.loads(r.output_text)
+
 def value_cache_key(card):
     parts = [
         card.get("player", ""),
@@ -698,7 +730,18 @@ with scan_tab:
             for s in card.get("_checklist_sources") or []:
                 if s.get("url"):
                     st.markdown(f"- [{s.get('title') or 'Reference'}]({s['url']})")
-
+            if not card.get("year"):
+                if st.button("🔎 Resolve Card Year", use_container_width=True):
+                    with st.spinner("Checking the exact card year..."):
+                        year_result = resolve_card_year(card)
+                        if year_result.get("confirmed_year"):
+                            card["year"] = year_result["confirmed_year"]
+                            st.session_state["scan_result"] = card
+                            st.rerun()
+                        else:
+                            st.warning("Exact release year could not be confirmed.")
+     
+     
         st.subheader("Confirm before adding")
         a,b,c = st.columns(3)
         with a:
