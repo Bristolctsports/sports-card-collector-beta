@@ -313,7 +313,7 @@ def analyze_card(front, back=None):
         "text": (
                             "Identify this sports trading card accurately. Use both front and back when provided. "
                 "Read the actual printed catalog/checklist CARD NUMBER. Prefer the FRONT if it is visibly printed there; otherwise read it from the BACK. "
-                "For the year field, read the explicit 4-digit copyright/printed year from the BACK of the card. "
+                "For the year field, identify the actual release year of this exact card/set. Use the printed copyright year only as one clue, not as the final answer when the set/card clearly belongs to a later release. Do NOT infer the year from player statistics, season dates, or biography text. "
                 "Do NOT infer or calculate the year from statistics, season dates, biography text, player history, set design, or release patterns. "
                 "If the printed card number or printed year cannot be read clearly, return that field as an empty string rather than guessing. "
                 "Do not confuse the card number with a jersey number, statistic, serial/print-run number, set size, or other incidental number. "
