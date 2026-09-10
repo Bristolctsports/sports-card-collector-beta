@@ -730,16 +730,17 @@ with scan_tab:
             for s in card.get("_checklist_sources") or []:
                 if s.get("url"):
                     st.markdown(f"- [{s.get('title') or 'Reference'}]({s['url']})")
-            if not card.get("year"):
-                if st.button("🔎 Resolve Card Year", use_container_width=True):
-                    with st.spinner("Checking the exact card year..."):
-                        year_result = resolve_card_year(card)
-                        if year_result.get("confirmed_year"):
-                            card["year"] = year_result["confirmed_year"]
-                            st.session_state["scan_result"] = card
-                            st.rerun()
-                        else:
-                            st.warning("Exact release year could not be confirmed.")
+        if not card.get("year"):
+            
+         if st.button("🔎 Resolve Card Year", use_container_width=True):
+            with st.spinner("Checking the exact card year..."):
+                year_result = resolve_card_year(card)
+                if year_result.get("confirmed_year"):
+                    card["year"] = year_result["confirmed_year"]
+                    st.session_state["scan_result"] = card
+                    st.rerun()
+                else:
+                    st.warning("Exact release year could not be confirmed.")
      
      
         st.subheader("Confirm before adding")
