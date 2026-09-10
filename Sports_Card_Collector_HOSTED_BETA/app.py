@@ -684,7 +684,7 @@ with scan_tab:
     if card:
         confidence = round(float(card.get("confidence") or 0) * 100)
         st.info(f"AI identification confidence: {confidence}%")
-
+        st.info(f"DEBUG copyright year read from back: {card.get('copyright_year') or 'BLANK'}")
         if card.get("card_number"):
             st.success(f"✅ Card # verified by {card.get('_card_number_status')}: {card.get('card_number')}")
         else:
