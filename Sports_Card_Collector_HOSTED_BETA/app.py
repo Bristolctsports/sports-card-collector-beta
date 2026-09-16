@@ -389,16 +389,15 @@ def checklist_crosscheck(identity, visual):
     
 def resolve_card_year(card):
     prompt = (
-        "Determine the actual release year of this exact sports card. "
+        "Look up the official release year for this exact sports card checklist entry. "
         f"Player: {card.get('player','')}; "
         f"Manufacturer: {card.get('manufacturer','')}; "
         f"Set: {card.get('set','')}; "
-        f"Card number: {card.get('card_number','')}; "
-        f"Copyright year printed on back: {card.get('copyright_year','')}. "
-        "Use the exact player, set, and card number as the primary identity. "
-        "The copyright year is only a clue and may differ from the actual release year. "
-        "Do not infer the release year from player statistics or biography text. "
-        "Return an empty confirmed_year if the exact release year cannot be determined reliably."
+        f"Card number: {card.get('card_number','')}. "
+        "Search using this exact player, set, and card number. "
+        "Return only the release year supported by a matching checklist or card reference. "
+        "Do not infer the year from statistics, biography text, or the copyright year. "
+        "If the exact card cannot be matched reliably, return an empty confirmed_year."
     )
 
     r = openai_client().responses.create(
