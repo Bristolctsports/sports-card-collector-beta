@@ -632,6 +632,8 @@ with scan_tab:
 
                 st.success("✅ Card details read")
                 identity["year"] = clean_year(identity.get("year"))
+                if identity.get("year") == clean_year(identity.get("copyright_year")):
+                   identity["year"] = ""
 
                 if identity.get("card_number"):
                     visual = {
