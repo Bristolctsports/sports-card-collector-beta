@@ -345,7 +345,7 @@ def verify_card_number(front, back, identification):
             "Verify ONLY the exact catalog/checklist card number. Examine the BACK image very carefully. "
             "Determine confirmed_year only from explicit printed year/release information or unmistakable set-design evidence. Do NOT infer the release year by adding one year to season statistics or biography text. If the release year cannot be determined reliably from the images, return confirmed_year as an empty string. "
             "Visually locate and read the actual printed card number; do not infer or calculate it. "
-            "Ignore set size, jersey numbers, copyright years, print codes and unrelated incidental numbers when reading the card number. You MAY use season/statistics text to determine confirmed_year. "
+            "Do NOT use season/statistics text, biography text, or player history to determine confirmed_year. "
             "The set size is NOT the card number. For example, a marking such as '13 of 660' means card_number='13', not '660'. "
             "A phrase like '13 of 660' is a checklist position: card_number='13'. It is NOT a serial number, so serial_number must remain empty unless the card is explicitly marked as a limited serial-numbered card. "
            f"First-pass identity: player={identification.get('player','')}. Do not use the first-pass year; determine confirmed_year independently from the card images. "
@@ -647,7 +647,7 @@ with scan_tab:
                 
                 st.info("🔍 Checking card details...")
 
-                needs_checklist = True
+                needs_checklist = False
                 
 
                 if needs_checklist:
