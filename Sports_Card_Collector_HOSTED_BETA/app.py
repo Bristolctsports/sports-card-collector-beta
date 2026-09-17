@@ -183,7 +183,33 @@ def image_bottom_crop_to_data_url(uploaded_file):
     crop.save(out, format="JPEG", quality=95, optimize=True)
     data = out.getvalue()
     return "data:image/jpeg;base64," + base64.b64encode(data).decode("utf-8")
+def read_copyright_year(back):
+    if back is None:
+        return ""
 
+    content = [
+        {
+            "type": "input_text",
+            "text": (
+                "Read ONLY the explicit 4-digit copyright year printed in the copyright/manufacturer line "
+                "at the very bottom of this sports card. Ignore every other year anywhere else on the card, "
+                "including statistics, seasons, awards, All-Star references, and biography text. "
+                "Return only the four-digit copyright year. If it cannot be read clearly, return blank."
+            ),
+        },
+        {
+            "type": "input_image",
+            "image_url": image_bottom_crop_to_data_url(back),
+            "detail": "high",
+        },
+    ]
+
+    r = openai_client().responses.create(
+        model=OPENAI_MODEL,
+        input=[{"role": "user", "content": content}],
+    )
+
+    return clean_year(r.output_text)
 
 # ---------- Supabase auth / data ----------
 
@@ -644,7 +670,7 @@ with scan_tab:
                 identity = analyze_card(front, back)
 
                 st.success("✅ Card details read")
-                identity["year"] = clean_year(identity.get("copyright_year"))
+                identity["year"] = read_copyright_year(back)
 
                 if identity.get("card_number"):
                     visual = {
