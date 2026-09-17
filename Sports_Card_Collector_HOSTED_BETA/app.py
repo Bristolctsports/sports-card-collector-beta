@@ -173,6 +173,18 @@ def image_to_data_url(uploaded_file):
     data = image_to_jpeg_bytes(uploaded_file)
     return "data:image/jpeg;base64," + base64.b64encode(data).decode("utf-8")
 
+def image_bottom_crop_to_data_url(uploaded_file):
+    raw = uploaded_file.getvalue()
+    image = Image.open(io.BytesIO(raw)).convert("RGB")
+    width, height = image.size
+    crop = image.crop((0, int(height * 0.60), width, height))
+    crop.thumbnail((1600, 1600))
+    out = io.BytesIO()
+    crop.save(out, format="JPEG", quality=95, optimize=True)
+    data = out.getvalue()
+    return "data:image/jpeg;base64," + base64.b64encode(data).decode("utf-8")
+
+
 # ---------- Supabase auth / data ----------
 
 def sb_headers(token=None, json_type=True):
