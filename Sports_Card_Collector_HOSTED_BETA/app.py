@@ -343,7 +343,8 @@ def analyze_card(front, back=None):
     }]
     content.append({"type": "input_image", "image_url": image_to_data_url(front), "detail": "low"})
     if back is not None:
-        content.append({"type": "input_image", "image_url": image_bottom_crop_to_data_url(back), "detail": "high"})
+       content.append({"type": "input_image", "image_url": image_to_data_url(back), "detail": "high"})
+       content.append({"type": "input_image", "image_url": image_bottom_crop_to_data_url(back), "detail": "high"})
     r = openai_client().responses.create(
         model=OPENAI_MODEL,
         input=[{"role": "user", "content": content}],
