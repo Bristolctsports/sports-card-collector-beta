@@ -688,7 +688,7 @@ with scan_tab:
                         visual = verify_card_number(front, back, identity)
                         
                 
-                st.info("🔍 Checking card details...")
+            st.info("🔍 Checking card details...")
 
                 needs_checklist = False
                 
