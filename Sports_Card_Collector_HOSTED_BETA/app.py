@@ -199,7 +199,7 @@ def read_copyright_year(back):
         },
         {
             "type": "input_image",
-            "image_url": image_bottom_crop_to_data_url(back),
+            "image_url": image_to_data_url(back),
             "detail": "high",
         },
     ]
