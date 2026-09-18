@@ -708,23 +708,23 @@ with scan_tab:
                         "sources": [],
                     }
 
-                st.success("✅ Card details checked")
-                confirmed_player = normalize_text(checklist.get("confirmed_player", ""))
-                photo_player = normalize_text(identity.get("player", ""))
+            st.success("✅ Card details checked")
+            confirmed_player = normalize_text(checklist.get("confirmed_player", ""))
+            photo_player = normalize_text(identity.get("player", ""))
 
-                identity_conflict = bool(
-                    confirmed_player
-                    and photo_player
-                    and confirmed_player != photo_player
-                )
+            identity_conflict = bool(
+                confirmed_player
+                and photo_player
+                and confirmed_player != photo_player
+            )
 
-                vnum = str(visual.get("confirmed_card_number") or "").strip()
-                cnum = str(checklist.get("confirmed_card_number") or "").strip()
-                agree = normalize_card_number(vnum) and normalize_card_number(vnum) == normalize_card_number(cnum)
-                strong_checklist = (
-                checklist.get("exact_identity_confirmed")
-                and float(checklist.get("confidence") or 0) >= .92
-                and not identity_conflict
+            vnum = str(visual.get("confirmed_card_number") or "").strip()
+            cnum = str(checklist.get("confirmed_card_number") or "").strip()
+            agree = normalize_card_number(vnum) and normalize_card_number(vnum) == normalize_card_number(cnum)
+            strong_checklist = (
+            checklist.get("exact_identity_confirmed")
+            and float(checklist.get("confidence") or 0) >= .92
+            and not identity_conflict
                 )
             first_num = str(identity.get("card_number") or "").strip()
 
