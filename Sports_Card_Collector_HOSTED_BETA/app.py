@@ -6,7 +6,7 @@ import re
 import uuid
 from datetime import datetime
 from pathlib import Path
-
+from concurrent.futures import ThreadPoolExecutor
 import requests
 import streamlit as st
 from openai import OpenAI
@@ -665,12 +665,16 @@ with scan_tab:
     if st.button("🔎 Identify Card", type="primary", disabled=front is None, use_container_width=True):
         try:
             st.info("🔍 Reading your card...")
-            with st.spinner("Identifying and cross-checking the card number..."):
+            with st.spinner("Identifying card details and reading copyright year..."):
                 st.info("🧠 Identifying player, set and card details...")
-                identity = analyze_card(front, back)
+                with ThreadPoolExecutor(max_workers=2) as executor:
+                    identity_future = executor.submit(analyze_card, front, back)
+                    year_future = executor.submit(read_copyright_year, back)
+                    identity = identity_future.result()
+                     copyright_year = year_future.result()
 
-                st.success("✅ Card details read")
-                identity["year"] = read_copyright_year(back)
+            st.success("✅ Card details read")
+            identity["year"] = copyright_year
 
                 if identity.get("card_number"):
                     visual = {
