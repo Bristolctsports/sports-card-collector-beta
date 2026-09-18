@@ -191,11 +191,12 @@ def read_copyright_year(back):
         {
             "type": "input_text",
             "text": (
-                "Read ONLY the explicit 4-digit copyright year printed in the copyright/manufacturer line "
-                "at the very bottom of this sports card. Ignore every other year anywhere else on the card, "
-                "including statistics, seasons, awards, All-Star references, and biography text. "
-                "Return only the four-digit copyright year. If it cannot be read clearly, return blank."
-            ),
+            "Read ONLY the tiny copyright/legal line printed along the very bottom edge of this sports card. "
+            "Return a 4-digit year ONLY if that exact year is visibly printed in the same legal line as the copyright symbol © or the manufacturer copyright notice. "
+            "IGNORE every other year and every other number on the card, including statistics, seasons, awards, biographies, draft years, All-Star references, and player history. "
+            "Do not infer, calculate, or guess the year. "
+            "If you cannot clearly see a 4-digit year in the bottom copyright/legal line, return blank."
+        ),
         },
         {
             "type": "input_image",
