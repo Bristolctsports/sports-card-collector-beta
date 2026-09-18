@@ -671,7 +671,7 @@ with scan_tab:
                     identity_future = executor.submit(analyze_card, front, back)
                     year_future = executor.submit(read_copyright_year, back)
                     identity = identity_future.result()
-                     copyright_year = year_future.result()
+                    copyright_year = year_future.result()
 
             st.success("✅ Card details read")
             identity["year"] = copyright_year
