@@ -177,7 +177,7 @@ def image_bottom_crop_to_data_url(uploaded_file):
     raw = uploaded_file.getvalue()
     image = Image.open(io.BytesIO(raw)).convert("RGB")
     width, height = image.size
-    crop = image.crop((0, int(height * 0.78), width, int(height * 0.90)))
+    crop = image.crop((0, int(height * 0.58), width, int(height * 0.70)))
     crop = crop.resize((crop.width * 3, crop.height * 3), Image.Resampling.LANCZOS)
     out = io.BytesIO()
     crop.save(out, format="JPEG", quality=95, optimize=True)
