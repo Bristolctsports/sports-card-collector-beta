@@ -693,10 +693,10 @@ with scan_tab:
             needs_checklist = False
                 
 
-                if needs_checklist:
+            if needs_checklist:
                     st.info("🔎 Taking a closer look...")
                     checklist = checklist_crosscheck(identity, visual)
-                else:
+            else:
                     checklist = {
                         "exact_identity_confirmed": False,
                         "confirmed_player": identity.get("player", ""),
