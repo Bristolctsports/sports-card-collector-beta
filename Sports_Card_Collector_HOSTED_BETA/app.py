@@ -675,7 +675,9 @@ with scan_tab:
                     copyright_year = year_future.result()
 
             st.success("✅ Card details read")
-            identity["year"] = copyright_year
+            year_candidates = [clean_year(identity.get("copyright_year")), clean_year(copyright_year)]
+            year_candidates = [y for y in year_candidates if y and y.isdigit() and len(y) == 4]
+            identity["year"] = max(year_candidates) if year_candidates else ""
 
             if identity.get("card_number"):
                     visual = {
