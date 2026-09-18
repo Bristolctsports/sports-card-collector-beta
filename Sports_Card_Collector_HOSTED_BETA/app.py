@@ -683,7 +683,7 @@ with scan_tab:
                         "evidence": "High-confidence first-pass identification.",
                         "ambiguous": False,
                     }
-                else:
+            else:
                         st.info("🔎 Verifying card number...")
                         visual = verify_card_number(front, back, identity)
                         
