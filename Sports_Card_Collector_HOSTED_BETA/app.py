@@ -676,7 +676,7 @@ with scan_tab:
             st.success("✅ Card details read")
             identity["year"] = copyright_year
 
-                if identity.get("card_number"):
+            if identity.get("card_number"):
                     visual = {
                         "confirmed_card_number": identity.get("card_number", ""),
                         "confidence": identity.get("confidence", 0),
