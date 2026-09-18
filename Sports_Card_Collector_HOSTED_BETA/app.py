@@ -690,7 +690,7 @@ with scan_tab:
                 
             st.info("🔍 Checking card details...")
 
-                needs_checklist = False
+            needs_checklist = False
                 
 
                 if needs_checklist:
