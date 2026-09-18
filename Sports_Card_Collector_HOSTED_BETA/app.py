@@ -172,7 +172,7 @@ def image_to_jpeg_bytes(uploaded_file):
 def image_to_data_url(uploaded_file):
     data = image_to_jpeg_bytes(uploaded_file)
     return "data:image/jpeg;base64," + base64.b64encode(data).decode("utf-8")
-    def image_to_year_data_url(uploaded_file):
+          def image_to_year_data_url(uploaded_file):
         raw = uploaded_file.getvalue()
         image = Image.open(io.BytesIO(raw)).convert("RGB")
         image.thumbnail((3200, 3200))
