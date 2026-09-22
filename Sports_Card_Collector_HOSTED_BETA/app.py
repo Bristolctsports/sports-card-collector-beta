@@ -794,6 +794,24 @@ with scan_tab:
             identity["_checklist_number"] = cnum
             identity["_checklist_reason"] = checklist.get("reason", "")
             identity["_checklist_sources"] = checklist.get("sources", [])
+
+            # If the tiny printed copyright line cannot be read, resolve the
+            # release year from the exact player, set and card number. This is
+            # automatic because the scanner should not require a child to know
+            # when a second lookup is needed.
+            if not identity.get("year") and identity.get("card_number"):
+                st.info("📅 Finding the exact card year…")
+                try:
+                    year_result = resolve_card_year(identity)
+                    resolved_year = clean_year(year_result.get("confirmed_year"))
+                    if resolved_year and resolved_year.isdigit() and len(resolved_year) == 4:
+                        identity["year"] = resolved_year
+                        identity["_year_status"] = "confirmed from exact checklist match"
+                except Exception:
+                    # Preserve the successful card identification and leave the
+                    # existing manual retry available if the lookup is unavailable.
+                    pass
+
             st.session_state["scan_result"] = identity
             st.session_state["scan_front"] = front
             st.session_state["scan_back"] = back
@@ -808,6 +826,8 @@ with scan_tab:
     if card:
         confidence = round(float(card.get("confidence") or 0) * 100)
         st.info(f"AI identification confidence: {confidence}%")
+        if card.get("year") and card.get("_year_status"):
+            st.success(f"✅ Year {card.get('year')} {card.get('_year_status')}")
         if card.get("card_number"):
             st.success(f"✅ Card # verified by {card.get('_card_number_status')}: {card.get('card_number')}")
         else:
