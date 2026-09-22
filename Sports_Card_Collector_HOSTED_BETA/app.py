@@ -653,7 +653,14 @@ with st.sidebar:
         st.rerun()
     st.markdown("**Photo tip:** fill the frame with one card, avoid glare, and photograph the back.")
 
-scan_tab, collection_tab, beta_tab = st.tabs(["📸 Scan Card", "📚 Collection", "🧪 Beta Help"])
+SCAN_TAB = "📸 Scan Card"
+COLLECTION_TAB = "📚 Collection"
+BETA_TAB = "🧪 Beta Help"
+default_tab = st.session_state.pop("default_tab", SCAN_TAB)
+scan_tab, collection_tab, beta_tab = st.tabs(
+    [SCAN_TAB, COLLECTION_TAB, BETA_TAB],
+    default=default_tab,
+)
 # ---------- Scan tab ----------
 
 with scan_tab:
@@ -954,8 +961,13 @@ with scan_tab:
                     back_path = upload_photo(token, user_id, st.session_state.get("scan_back"), "back") if st.session_state.get("scan_back") else ""
                     candidate["front_photo_path"] = front_path
                     candidate["back_photo_path"] = back_path
-                    insert_card(token, candidate)
-                    st.success(f"Added {player} to your collection.")
+                    saved_card = insert_card(token, candidate)
+                    st.session_state["collection_notice"] = (
+                        f"✅ {saved_card.get('player') or player} was added to your collection."
+                    )
+                    st.session_state["default_tab"] = COLLECTION_TAB
+                    reset_scan()
+                    st.rerun()
                     
                     
             except Exception as exc:
@@ -973,7 +985,8 @@ with scan_tab:
                 if st.button("➕ Increase quantity", type="primary", use_container_width=True):
                     update_card(token, e["id"], {"quantity": int(e.get("quantity") or 1) + int(qty)})
                     st.session_state.pop("duplicate", None)
-                    st.success("Quantity updated.")
+                    st.session_state["collection_notice"] = "✅ Quantity updated."
+                    st.session_state["default_tab"] = COLLECTION_TAB
                     reset_scan()
                     st.rerun()
             with d2:
@@ -981,8 +994,12 @@ with scan_tab:
                     candidate = dict(dup_state["candidate"])
                     candidate["front_photo_path"] = upload_photo(token, user_id, st.session_state.get("scan_front"), "front")
                     candidate["back_photo_path"] = upload_photo(token, user_id, st.session_state.get("scan_back"), "back") if st.session_state.get("scan_back") else ""
-                    insert_card(token, candidate)
+                    saved_card = insert_card(token, candidate)
                     st.session_state.pop("duplicate", None)
+                    st.session_state["collection_notice"] = (
+                        f"✅ {saved_card.get('player') or 'Card'} was saved as a separate copy."
+                    )
+                    st.session_state["default_tab"] = COLLECTION_TAB
                     reset_scan()
                     st.rerun()
             with d3:
@@ -994,6 +1011,10 @@ with scan_tab:
 # ---------- Collection tab ----------
 
 with collection_tab:
+    collection_notice = st.session_state.pop("collection_notice", None)
+    if collection_notice:
+        st.success(collection_notice)
+
     try:
         cards = list_cards(token)
     except Exception as exc:
