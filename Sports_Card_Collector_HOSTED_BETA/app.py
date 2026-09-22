@@ -1,4 +1,5 @@
 import base64
+import hashlib
 import io
 import json
 import os
@@ -12,7 +13,7 @@ import streamlit as st
 from openai import OpenAI
 from PIL import Image
 
-st.set_page_config(page_title="AI Sports Card Collector Beta", page_icon="🏆", layout="wide")
+st.set_page_config(page_title="Card Scout", page_icon="🔎", layout="wide")
 
 # ---------- Configuration ----------
 
@@ -576,6 +577,7 @@ def reset_scan():
     st.session_state.pop("duplicate", None)
     st.session_state.pop("scan_front", None)
     st.session_state.pop("scan_back", None)
+    st.session_state.pop("identified_scan_signature", None)
     st.session_state["scan_nonce"] = st.session_state.get("scan_nonce", 0) + 1
 
 # ---------- Auth UI ----------
@@ -590,7 +592,8 @@ st.markdown("""
 </style>
 """, unsafe_allow_html=True)
 
-st.title("🏆 AI Sports Card Collector — Private Beta")
+st.title("🔎 Card Scout")
+st.caption("Scan it. Identify it. Add it to your collection.")
 
 if not configured():
     st.error("This hosted beta has not been configured by the owner yet.")
@@ -672,8 +675,40 @@ with scan_tab:
         with c2:
             back = st.file_uploader("Choose back photo", type=["jpg","jpeg","png","webp"], key=f"back_up_{nonce}")
 
-    if st.button("🔎 Identify Card", type="primary", disabled=front is None, use_container_width=True):
+    scan_signature = ""
+    if front is not None:
+        signature_bytes = front.getvalue()
+        if back is not None:
+            signature_bytes += b"|" + back.getvalue()
+        scan_signature = hashlib.sha256(signature_bytes).hexdigest()
+
+    photos_ready = front is not None and back is not None
+    new_photo_pair = bool(
+        photos_ready
+        and scan_signature != st.session_state.get("identified_scan_signature")
+    )
+
+    if photos_ready:
+        st.success("✅ Front and back received")
+        if new_photo_pair:
+            st.info("Card Scout is starting identification automatically…")
+    elif front is not None:
+        st.info("✅ Front received. Take the back photo for automatic identification, or identify using the front only.")
+    else:
+        st.info("Take a clear photo of the front, then the back of the card.")
+
+    identify_clicked = st.button(
+        "🔎 Identify Card Now",
+        type="primary",
+        disabled=front is None,
+        use_container_width=True,
+    )
+
+    if new_photo_pair or identify_clicked:
         try:
+            # Mark this exact pair before the API call so Streamlit reruns do not
+            # submit the same card repeatedly. A failure clears it for easy retry.
+            st.session_state["identified_scan_signature"] = scan_signature
             st.info("🔍 Reading your card...")
             with st.spinner("Identifying card details and reading copyright year..."):
                 st.info("🧠 Identifying player, set and card details...")
@@ -765,13 +800,14 @@ with scan_tab:
             st.session_state.pop("valuation", None)
             st.session_state.pop("duplicate", None)
         except Exception as exc:
+            st.session_state.pop("identified_scan_signature", None)
             st.error(f"Identification failed: {exc}")
+            st.warning("Please check the photos and press **Identify Card Now** to try again.")
 
     card = st.session_state.get("scan_result")
     if card:
         confidence = round(float(card.get("confidence") or 0) * 100)
         st.info(f"AI identification confidence: {confidence}%")
-        st.info(f"DEBUG copyright year read from back: {card.get('copyright_year') or 'BLANK'}")
         if card.get("card_number"):
             st.success(f"✅ Card # verified by {card.get('_card_number_status')}: {card.get('card_number')}")
         else:
@@ -1060,13 +1096,13 @@ with collection_tab:
 
 with beta_tab:
     st.header("🧪 Beta Testing Instructions")
-    st.write("Thanks for helping test the AI Sports Card Collector!")
+    st.write("Thanks for helping test Card Scout!")
 
     st.markdown("""
 ### What to test
 
 1. Scan the **front and back** of a sports card.
-2. Press **Identify Card**.
+2. Card Scout will begin identifying it automatically.
 3. Check the player, year, manufacturer, set, and card number.
 4. Correct anything that is wrong.
 5. Add the card to your collection.
