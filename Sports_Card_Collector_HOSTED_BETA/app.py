@@ -313,6 +313,40 @@ def delete_card(token, card_id):
     if not r.ok:
         raise RuntimeError(r.text)
 
+def list_wishlist(token):
+    r = requests.get(
+        f"{SUPABASE_URL}/rest/v1/wishlist",
+        headers=sb_headers(token),
+        params={"select": "*", "order": "created_at.desc"},
+        timeout=30,
+    )
+    if not r.ok:
+        raise RuntimeError(r.text)
+    return r.json()
+
+def insert_wishlist_item(token, row):
+    headers = sb_headers(token)
+    headers["Prefer"] = "return=representation"
+    r = requests.post(
+        f"{SUPABASE_URL}/rest/v1/wishlist",
+        headers=headers,
+        json=row,
+        timeout=30,
+    )
+    if not r.ok:
+        raise RuntimeError(r.text)
+    return r.json()[0]
+
+def delete_wishlist_item(token, item_id):
+    r = requests.delete(
+        f"{SUPABASE_URL}/rest/v1/wishlist",
+        headers=sb_headers(token),
+        params={"id": f"eq.{item_id}"},
+        timeout=30,
+    )
+    if not r.ok:
+        raise RuntimeError(r.text)
+
 def upload_photo(token, user_id, uploaded_file, side):
     if uploaded_file is None:
         return ""
@@ -486,6 +520,25 @@ def ebay_sold_url(card):
         "https://www.ebay.com/sch/i.html"
         f"?_nkw={quote_plus(query)}&LH_Sold=1&LH_Complete=1"
     )
+
+def marketplace_query(card):
+    parts = [
+        card.get("year", ""), card.get("manufacturer", ""),
+        card.get("set") or card.get("set_name", ""), card.get("player", ""),
+        f"#{card.get('card_number', '')}" if card.get("card_number") else "",
+        card.get("parallel_variation", ""),
+    ]
+    return " ".join(str(part).strip() for part in parts if str(part).strip())
+
+def marketplace_urls(card):
+    query = marketplace_query(card)
+    encoded = quote_plus(query)
+    return {
+        "eBay": f"https://www.ebay.com/sch/i.html?_nkw={encoded}",
+        "COMC": f"https://www.google.com/search?q=site%3Acomc.com+{encoded}",
+        "Sportlots": f"https://www.google.com/search?q=site%3Asportlots.com+{encoded}",
+        "Beckett": f"https://www.google.com/search?q=site%3Amarketplace.beckett.com+{encoded}",
+    }
 
 def get_cached_value(card):
     try:
@@ -675,9 +728,10 @@ with st.sidebar:
 SCAN_TAB = "📸 Scan Card"
 COLLECTION_TAB = "📚 Collection"
 BETA_TAB = "🧪 Beta Help"
+MORE_TAB = "••• More"
 default_tab = st.session_state.pop("default_tab", SCAN_TAB)
-scan_tab, collection_tab, beta_tab = st.tabs(
-    [SCAN_TAB, COLLECTION_TAB, BETA_TAB],
+scan_tab, collection_tab, more_tab, beta_tab = st.tabs(
+    [SCAN_TAB, COLLECTION_TAB, MORE_TAB, BETA_TAB],
     default=default_tab,
 )
 # ---------- Scan tab ----------
@@ -1156,6 +1210,85 @@ with collection_tab:
                 mime="text/csv",
                 use_container_width=True,
             )
+
+
+with more_tab:
+    st.header("⭐ Wish List")
+    st.write("Save a card you want, then search four card marketplaces with one tap.")
+    st.caption("Ask a parent or guardian before buying anything online.")
+
+    with st.expander("➕ Add a card to my wish list", expanded=True):
+        with st.form("wishlist_form", clear_on_submit=True):
+            w1, w2 = st.columns(2)
+            with w1:
+                wish_player = st.text_input("Player *")
+                wish_year = st.text_input("Year")
+                wish_manufacturer = st.text_input("Manufacturer")
+            with w2:
+                wish_set = st.text_input("Set")
+                wish_number = st.text_input("Card #")
+                wish_parallel = st.text_input("Parallel / Variation")
+            wish_notes = st.text_input("Notes")
+            wish_submit = st.form_submit_button(
+                "⭐ Add to Wish List", type="primary", use_container_width=True
+            )
+
+        if wish_submit:
+            if not wish_player.strip():
+                st.error("Enter the player's name.")
+            else:
+                try:
+                    insert_wishlist_item(token, {
+                        "player": wish_player.strip(),
+                        "year": wish_year.strip(),
+                        "manufacturer": wish_manufacturer.strip(),
+                        "set_name": wish_set.strip(),
+                        "card_number": wish_number.strip(),
+                        "parallel_variation": wish_parallel.strip(),
+                        "notes": wish_notes.strip(),
+                    })
+                    st.session_state["default_tab"] = MORE_TAB
+                    st.rerun()
+                except Exception as exc:
+                    st.error(f"Could not save wish-list card: {exc}")
+
+    try:
+        wishlist = list_wishlist(token)
+    except Exception as exc:
+        wishlist = []
+        st.warning("Wish List setup is not finished yet. The owner needs to add the Wish List table in Supabase.")
+
+    if not wishlist:
+        st.info("Your wish list is empty.")
+    else:
+        for item in wishlist:
+            with st.container(border=True):
+                title = " ".join(x for x in [
+                    str(item.get("year") or ""),
+                    str(item.get("player") or ""),
+                    f"#{item.get('card_number')}" if item.get("card_number") else "",
+                ] if x)
+                st.subheader(title or "Wish-list card")
+                details = " • ".join(x for x in [
+                    item.get("manufacturer"), item.get("set_name"),
+                    item.get("parallel_variation"),
+                ] if x)
+                if details:
+                    st.caption(details)
+                if item.get("notes"):
+                    st.write(item["notes"])
+
+                urls = marketplace_urls(item)
+                b1, b2, b3, b4 = st.columns(4)
+                b1.link_button("eBay", urls["eBay"], use_container_width=True)
+                b2.link_button("COMC", urls["COMC"], use_container_width=True)
+                b3.link_button("Sportlots", urls["Sportlots"], use_container_width=True)
+                b4.link_button("Beckett", urls["Beckett"], use_container_width=True)
+
+                if st.button("Remove from Wish List", key=f"wish_delete_{item['id']}"):
+                    delete_wishlist_item(token, item["id"])
+                    st.session_state["default_tab"] = MORE_TAB
+                    st.rerun()
 
 
 
