@@ -1,4 +1,4 @@
-# AI Sports Card Collector — Hosted Private Beta
+# Card Scout — Hosted Private Beta
 
 This package is the version for sending testers **one website link**.
 
