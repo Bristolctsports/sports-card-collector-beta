@@ -97,3 +97,36 @@ using (
 create index if not exists cards_user_id_idx on public.cards(user_id);
 create index if not exists cards_player_idx on public.cards(player);
 create index if not exists cards_set_name_idx on public.cards(set_name);
+
+-- Private wish list for cards a collector wants to find.
+create table if not exists public.wishlist (
+    id uuid primary key default gen_random_uuid(),
+    user_id uuid not null default auth.uid() references auth.users(id) on delete cascade,
+    player text not null,
+    year text,
+    manufacturer text,
+    set_name text,
+    card_number text,
+    parallel_variation text,
+    notes text,
+    created_at timestamptz not null default now()
+);
+
+alter table public.wishlist enable row level security;
+
+drop policy if exists "Users can read own wishlist" on public.wishlist;
+create policy "Users can read own wishlist"
+on public.wishlist for select
+using (auth.uid() = user_id);
+
+drop policy if exists "Users can insert own wishlist" on public.wishlist;
+create policy "Users can insert own wishlist"
+on public.wishlist for insert
+with check (auth.uid() = user_id);
+
+drop policy if exists "Users can delete own wishlist" on public.wishlist;
+create policy "Users can delete own wishlist"
+on public.wishlist for delete
+using (auth.uid() = user_id);
+
+create index if not exists wishlist_user_id_idx on public.wishlist(user_id);
