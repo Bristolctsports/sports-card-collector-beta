@@ -5,6 +5,7 @@ import json
 import os
 import re
 import uuid
+from urllib.parse import quote_plus
 from datetime import datetime
 from pathlib import Path
 from concurrent.futures import ThreadPoolExecutor
@@ -470,6 +471,22 @@ def value_cache_key(card):
         card.get("parallel_variation", ""),
     ]
     return "|".join(normalize_text(x) for x in parts)
+
+def ebay_sold_url(card):
+    parts = [
+        card.get("year", ""),
+        card.get("manufacturer", ""),
+        card.get("set", ""),
+        card.get("player", ""),
+        f"#{card.get('card_number', '')}" if card.get("card_number") else "",
+        card.get("parallel_variation", ""),
+    ]
+    query = " ".join(str(part).strip() for part in parts if str(part).strip())
+    return (
+        "https://www.ebay.com/sch/i.html"
+        f"?_nkw={quote_plus(query)}&LH_Sold=1&LH_Complete=1"
+    )
+
 def get_cached_value(card):
     try:
         cache_key = value_cache_key(card)
@@ -513,6 +530,7 @@ def save_cached_value(card, value_data):
     except Exception:
         pass
 def find_value(card):
+    sold_search_url = ebay_sold_url(card)
     prompt = (
     "Find recent SOLD/COMPLETED sales for this exact raw sports card. "
     f"Player: {card.get('player','')}; "
@@ -522,8 +540,9 @@ def find_value(card):
     f"Set: {card.get('set','')}; "
     f"Card number: {card.get('card_number','')}; "
     f"Parallel/variation: {card.get('parallel_variation','')}. "
+    f"Exact eBay completed/sold search URL: {sold_search_url}. "
     "Trust this card identity. Do not perform a separate checklist verification. "
-    "Search directly for sold/completed sales of this exact card. "
+    "Search directly for sold/completed sales of this exact card, prioritizing eBay sold results. "
     "Do not use active asking prices. "
     "Do not use different players, years, card numbers, parallels, graded cards, or unrelated sets. "
     "If exact sold evidence exists, return exact_match=true and the best current raw-card value estimate. "
@@ -892,6 +911,12 @@ with scan_tab:
             "condition": condition, "notes": notes,
         }
 
+        st.link_button(
+            "🛒 View eBay Sold Listings",
+            ebay_sold_url(current_card),
+            use_container_width=True,
+        )
+
         if st.button("💰 Find Card Value", disabled=not card_number.strip(), use_container_width=True):
                 try:
                     with st.spinner("Searching recent sold-card evidence..."):
@@ -903,7 +928,6 @@ with scan_tab:
                             if valuation_matches(current_card, val):
                                 save_cached_value(current_card, val)
 
-                        st.write("DEBUG value result:", val)
                         if valuation_matches(current_card, val):
                             st.session_state["valuation"] = val
                         else:
