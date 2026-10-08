@@ -269,6 +269,99 @@ def auth_user(token):
         raise RuntimeError("Session expired. Please sign in again.")
     return r.json()
 
+def auth_request_password_reset(email):
+    r = requests.post(
+        f"{SUPABASE_URL}/auth/v1/recover",
+        headers=sb_headers(),
+        json={"email": email},
+        timeout=30,
+    )
+    if not r.ok:
+        raise RuntimeError("Unable to send a reset email right now. Please try again later.")
+
+
+def auth_update_password(token, password):
+    r = requests.put(
+        f"{SUPABASE_URL}/auth/v1/user",
+        headers=sb_headers(token),
+        json={"password": password},
+        timeout=30,
+    )
+    if not r.ok:
+        # Never expose raw responses, URLs, or recovery credentials in the UI.
+        if r.status_code in (401, 403):
+            raise RuntimeError("This reset session expired. Request a new reset email.")
+        raise RuntimeError("Password could not be updated. Choose a different strong password or request a new reset email.")
+
+
+# Supabase's default recovery email returns credentials in the browser fragment.
+# Python cannot read that fragment. This trusted v2 component transfers it over
+# Streamlit's existing connection, then removes it from the address/history.
+RECOVERY_JS = """
+export default function({ setTriggerValue }) {
+    const params = new URLSearchParams(window.location.hash.slice(1));
+    const recovery = params.get("type") === "recovery";
+    const failed = params.has("error") || params.has("error_code");
+    if (!recovery && !failed) return;
+    const token = params.get("access_token");
+    window.history.replaceState(null, "", window.location.pathname + window.location.search);
+    setTriggerValue("recovery", recovery && token && !failed
+        ? { access_token: token }
+        : { error: true });
+}
+"""
+
+
+def render_password_recovery():
+    bridge = st.components.v2.component("card_scout_recovery", js=RECOVERY_JS)
+    result = bridge(key="recovery_bridge", on_recovery_change=lambda: None)
+    event = result.recovery
+    if event:
+        # Do not reuse another account's collection session during recovery.
+        st.session_state.pop("access_token", None)
+        st.session_state.pop("recovery_token", None)
+        if event.get("error"):
+            st.session_state["recovery_error"] = "This reset link is invalid or expired. Use Forgot password? below to request a new one."
+        else:
+            try:
+                auth_user(event["access_token"])
+                st.session_state["recovery_token"] = event["access_token"]
+                st.session_state.pop("recovery_error", None)
+            except Exception:
+                st.session_state["recovery_error"] = "This reset link could not be verified. Use Forgot password? below to request a new one."
+
+    if st.session_state.get("recovery_error"):
+        st.error(st.session_state["recovery_error"])
+    if not st.session_state.get("recovery_token"):
+        return
+    st.subheader("Choose a new password")
+    st.caption("Your existing account and saved collection will stay the same.")
+    with st.form("reset_password", clear_on_submit=True):
+        password = st.text_input("New password (8+ characters)", type="password")
+        confirmation = st.text_input("Confirm new password", type="password")
+        submitted = st.form_submit_button("Save new password", type="primary")
+    if submitted:
+        if len(password) < 8:
+            st.error("Use a password with at least 8 characters.")
+        elif password != confirmation:
+            st.error("The passwords do not match. Please enter them again.")
+        else:
+            try:
+                auth_update_password(st.session_state["recovery_token"], password)
+            except RuntimeError as exc:
+                st.error(str(exc))
+            except Exception:
+                st.error("Unable to reach the server. Please try again.")
+            else:
+                st.session_state.clear()
+                st.session_state["password_reset_complete"] = True
+                st.rerun()
+    if st.button("Cancel password reset"):
+        st.session_state.clear()
+        st.rerun()
+    st.stop()
+
+
 def list_cards(token):
     r = requests.get(
         f"{SUPABASE_URL}/rest/v1/cards",
@@ -671,8 +764,28 @@ if not configured():
     st.error("This hosted beta has not been configured by the owner yet.")
     st.stop()
 
+render_password_recovery()
+
+if st.session_state.pop("password_reset_complete", False):
+    st.success("Your password has been changed. Sign in with your new password.")
+
 if "access_token" not in st.session_state:
-    login_tab, signup_tab = st.tabs(["Sign in", "Create account"])
+    login_tab, signup_tab, reset_tab = st.tabs(["Sign in", "Create account", "Forgot password?"])
+    with reset_tab:
+        st.caption("Enter your account email. Open the new recovery email to choose a new password.")
+        with st.form("request_password_reset"):
+            reset_email = st.text_input("Account email", key="reset_email")
+            send_reset = st.form_submit_button("Send reset email")
+        if send_reset:
+            if not reset_email.strip() or "@" not in reset_email:
+                st.error("Enter your account email address.")
+            else:
+                try:
+                    auth_request_password_reset(reset_email.strip())
+                except Exception:
+                    st.error("Unable to send a reset email right now. Please try again later.")
+                else:
+                    st.success("If an account exists for this email, a reset email has been sent. Check your inbox and spam folder.")
     with login_tab:
         with st.form("login"):
             email = st.text_input("Email")
